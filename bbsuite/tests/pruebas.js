@@ -319,4 +319,72 @@ grupo('Informe de WhatsApp', ()=>{
   });
 });
 
+grupo('Defectos corregidos tras la revisión de calidad', ()=>{
+  prueba('los importes largos llevan separador de miles a la española', ()=>{
+    igual(L.eur(1500000), '1.500.000,00 €');
+    igual(L.eur(107142.86), '107.142,86 €');
+    igual(L.eur(47), '47,00 €');
+    igual(L.eur(-1234.5), '-1.234,50 €');
+    igual(L.signedEur(-1234.5), '-1.234,50 €');
+    igual(L.signedEur(750000), '+750.000,00 €');
+  });
+  prueba('el reparto de un premio grande llega a eur() ya redondeado a céntimos', ()=>{
+    /* eur() no puede arreglar un número que ya venga con más de dos
+       decimales: por eso todos los importes pasan antes por aEuros(),
+       que es aritmética de céntimos enteros. Esta prueba fija ese
+       contrato, que es el que evita los redondeos raros en pantalla. */
+    const r = L.Finanzas.procesarPremio({previousFund:{aportaciones:0,premios:0}, movements:[]},
+      750000, 50, '5R', {confirmarGrande:true, pctReparto:0.5, pctReinversion:0.5, numJugadores:7});
+    igual(r.porJugador, 53571.43, '375.000 € entre 7 jugadores');
+    igual(L.eur(r.porJugador), '53.571,43 €');
+    igual(L.eur(r.reinvertido), '375.000,00 €');
+  });
+  prueba('los porcentajes usan coma decimal', ()=>{
+    igual(L.porcentaje(5.64), '5,6 %');
+    igual(L.porcentaje(100), '100,0 %');
+  });
+  prueba('el importe de un premio no se contagia a las demás apuestas de su categoría', ()=>{
+    /* Un boleto con reintegro 7 y cuatro apuestas: si el sorteo saca el
+       reintegro 7, las cuatro son premio de categoría R, pero solo una
+       tiene importe registrado todavía. */
+    const boletos = [{id:1, reintegro:7, apuestas:[[1,2,3,4,5,6],[7,8,9,10,11,12],[13,14,15,16,17,18],[19,20,21,22,23,24]]}];
+    const texto = L.generarInformeWhatsapp(boletos, [40,41,42,43,44,45], 7, {}, null, {'1:2': 3});
+    const premiadas = texto.split('\n').filter(l=>l.includes('PREMIO categoría R'));
+    igual(premiadas.length, 4, 'las cuatro apuestas son premio');
+    igual(premiadas.filter(l=>l.includes('3,00 €')).length, 1, 'solo una lleva importe');
+    igual(premiadas.filter(l=>l.includes('pendiente de registrar')).length, 3, 'las otras tres quedan pendientes');
+    cierto(texto.includes('Importe total estimado: 3,00 €'), 'el total solo suma lo registrado');
+  });
+  prueba('dos premios de la misma categoría con importes distintos se respetan', ()=>{
+    const boletos = [{id:1, reintegro:7, apuestas:[[1,2,3,4,5,6],[7,8,9,10,11,12]]}];
+    const texto = L.generarInformeWhatsapp(boletos, [40,41,42,43,44,45], 7, {}, null, {'1:1': 3, '1:2': 5});
+    cierto(texto.includes('3,00 €'), 'el primero conserva su importe');
+    cierto(texto.includes('5,00 €'), 'el segundo conserva el suyo');
+    cierto(texto.includes('Importe total estimado: 8,00 €'));
+  });
+  prueba('nunca se confirma un boleto sin apuestas aunque el pool se quede corto', ()=>{
+    /* Con un pool manual de 7 números solo existen C(7,6)=7 apuestas
+       distintas, pero el plan pedía 47 en 10 boletos. */
+    const reglas = {precioApuesta:1, method:'ANALISIS', players:[{name:'A'}],
+      analysis:{poolSize:7, guarantee:3, poolMode:'manual', poolManual:[1,2,3,4,5,6,7], enumThreshold:50000, sampleCandidates:120, poolSeed:1},
+      filters:{}};
+    const plan = L.planSorteo({aportaciones:47, premios:0}, 1);
+    const meta = L.generarBoletos(reglas, plan, {lastIndexUsed:0});
+    cierto(meta.boletos.every(b=>b.apuestas.length>0), 'ningún boleto se queda vacío');
+    igual(meta.numApuestasTotal, 7, 'solo hay 7 combinaciones únicas');
+    igual(meta.boletos.length, 7, 'y por tanto 7 boletos, no 10');
+    igual(meta.costeReal, 7, 'se cobra lo que se juega');
+    igual(meta.boletosPrevistos, 10, 'se recuerda cuántos preveía el plan');
+    igual(meta.reintegrosCubiertos, 7, 'y cuántos reintegros quedan cubiertos de verdad');
+  });
+  prueba('cuando el pool da de sobra, no se recorta ningún boleto', ()=>{
+    const reglas = {precioApuesta:1, method:'ALEATORIO', players:[{name:'A'}],
+      analysis:{poolSize:25, guarantee:4, poolMode:'random', poolManual:[]}, filters:L.filtrosPorDefecto()};
+    const plan = L.planSorteo({aportaciones:47, premios:0}, 1);
+    const meta = L.generarBoletos(reglas, plan, {lastIndexUsed:0});
+    igual(meta.boletos.length, 10);
+    igual(meta.reintegrosCubiertos, 10);
+  });
+});
+
 resumen();

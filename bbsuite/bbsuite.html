@@ -349,7 +349,9 @@
   </div>
   <div class="card" id="currentCard" style="display:none;">
     <h2>Boletos del sorteo en curso <small id="current-tag"></small></h2>
+    <div class="hint" id="currentInfo"></div>
     <div id="currentTickets"></div>
+    <button class="btn btn-danger" onclick="UI.anularSorteoEnCurso()">↩ Anular estos boletos y devolver el gasto al fondo</button>
   </div>
 </div>
 
@@ -436,8 +438,19 @@ const $ = id => document.getElementById(id);
    localStorage o window.
    ============================================================ */
 const pad = n => String(n).padStart(2,'0');
-const eur = n => (Number(n)||0).toFixed(2).replace('.',',') + ' €';
-const signedEur = n => (n>=0?'+':'-') + Math.abs(Number(n)||0).toFixed(2).replace('.',',') + ' €';
+/* Importes al uso español: punto para los miles y coma para los
+   céntimos. Se escribe a mano en vez de con toLocaleString porque el
+   formato de la peña no debe depender del idioma que tenga puesto el
+   móvil de quien abra la aplicación. */
+function formatearImporte(n){
+  const partes = (Number(n)||0).toFixed(2).split('.');
+  const negativo = partes[0].charAt(0)==='-';
+  const enteros = (negativo ? partes[0].slice(1) : partes[0]).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return (negativo?'-':'') + enteros + ',' + partes[1];
+}
+const eur = n => formatearImporte(n) + ' €';
+const signedEur = n => (n>=0?'+':'-') + formatearImporte(Math.abs(Number(n)||0)) + ' €';
+const porcentaje = (x, decimales) => (Number(x)||0).toFixed(decimales==null?1:decimales).replace('.',',') + ' %';
 function parseNumList(str){
   return (String(str||'').match(/\d+/g)||[]).map(Number);
 }
@@ -735,7 +748,7 @@ function planSorteo(saldos, precioApuesta){
   const reparto = repartoTeorico(apuestas, boletos);
   let aviso = null;
   if(apuestas===0) aviso = 'El fondo no llega ni para una apuesta: este sorteo no se puede jugar.';
-  else if(boletos<MIN_BOLETOS) aviso = `Con ${apuestas} apuesta${apuestas===1?'':'s'} solo salen ${boletos} boleto${boletos===1?'':'s'}: quedan ${MIN_BOLETOS-boletos} reintegro${MIN_BOLETOS-boletos===1?'':'s'} sin cubrir. Harían falta al menos ${aEuros(MIN_BOLETOS*centimosApuesta).toFixed(2).replace('.',',')} € para cubrir los diez.`;
+  else if(boletos<MIN_BOLETOS) aviso = `Con ${apuestas} apuesta${apuestas===1?'':'s'} solo salen ${boletos} boleto${boletos===1?'':'s'}: quedan ${MIN_BOLETOS-boletos} reintegro${MIN_BOLETOS-boletos===1?'':'s'} sin cubrir. Harían falta al menos ${eur(aEuros(MIN_BOLETOS*centimosApuesta))} para cubrir los diez.`;
   return {fondo, precioApuesta:aEuros(centimosApuesta), apuestas, boletos, coste, sobrante,
           reparto, resumen:resumenReparto(reparto), cubreReintegros: boletos>=MIN_BOLETOS, aviso};
 }
@@ -786,10 +799,19 @@ function generarBoletos(rules, plan, cyclicState){
     apuestasPlanas = r.apuestas; cyclicStateFinal = r.estadoFinal;
   } else throw new Error('Método de generación desconocido: '+rules.method);
 
-  const boletosApuestas = repartirApuestasEnBoletos(apuestasPlanas, numBoletos);
+  /* Si el método no ha podido producir tantas apuestas como pedía el
+     plan -el caso típico es un pool de Análisis tan pequeño que agota
+     sus combinaciones únicas-, se recorta el número de boletos. Un
+     boleto sin ninguna apuesta no existe: no se puede rellenar, no
+     juega su reintegro y falsearía la garantía de que los diez
+     reintegros están cubiertos. */
+  const numBoletosEfectivo = Math.min(numBoletos, apuestasPlanas.length);
+  const boletosApuestas = repartirApuestasEnBoletos(apuestasPlanas, numBoletosEfectivo);
   const reintegros = asignarReintegros(boletosApuestas);
   const boletos = [];
-  for(let i=0;i<numBoletos;i++) boletos.push({id:i+1, reintegro:reintegros[i], apuestas:boletosApuestas[i]});
+  for(let i=0;i<numBoletosEfectivo;i++) boletos.push({id:i+1, reintegro:reintegros[i], apuestas:boletosApuestas[i]});
+  meta.boletosPrevistos = numBoletos;
+  meta.reintegrosCubiertos = new Set(reintegros).size;
   meta.boletos = boletos;
   meta.numApuestasTotal = boletos.reduce((s,b)=>s+b.apuestas.length,0);
   /* El coste real es el de las apuestas que de verdad se han podido
@@ -848,6 +870,10 @@ const Finanzas = {
     opts = opts||{};
     const r = Finanzas.aplicar(Finanzas.saldos(ledger), tipo, importe);
     ledger.movements.push({
+      /* Identificador propio del movimiento: permite localizarlo más
+         tarde aunque se hayan borrado o añadido otros por delante, que
+         es lo que hace falta para poder anular un sorteo confirmado. */
+      id: opts.id || ('mov-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,7)),
       date: opts.date || new Date().toISOString().slice(0,10),
       type: tipo,
       player: opts.player||null,
@@ -878,6 +904,12 @@ const Finanzas = {
     if(index<0 || index>=ledger.movements.length) return ledger;
     ledger.movements.splice(index,1);
     return Finanzas.recalcularBalances(ledger);
+  },
+  eliminarMovimientoPorId(ledger, id){
+    const i = ledger.movements.findIndex(m=>m.id===id);
+    if(i<0) return false;
+    Finanzas.eliminarMovimiento(ledger, i);
+    return true;
   },
   clasificarUmbralPremio(importe,umbral){ return importe<umbral ? 'pequeno':'grande'; },
   /* numJugadores solo se usa para informar de cuánto toca a cada uno en
@@ -935,7 +967,12 @@ function formatearApuestaConCirculos(apNums, apReint, aciertos, aciertoReintegro
   const reintStr = aciertoReintegro ? `R:${circulo(apReint)}` : `R:${apReint}`;
   return partes.join(' ') + '  ' + reintStr;
 }
-function generarInformeWhatsapp(boletos, sorteoNums, sorteoReint, tablaPremios, fechaSorteo){
+/* importesPorApuesta, si se pasa, lleva el importe real de cada premio
+   ya registrado, indexado por "idBoleto:nApuesta". Manda sobre la tabla
+   de premios por categoría: dos apuestas de la misma categoría pueden
+   haber cobrado importes distintos, y solo una de ellas puede estar
+   registrada todavía. */
+function generarInformeWhatsapp(boletos, sorteoNums, sorteoReint, tablaPremios, fechaSorteo, importesPorApuesta){
   const L=[];
   L.push(AVISO_OBLIGATORIO); L.push('');
   L.push('='.repeat(40));
@@ -954,10 +991,13 @@ function generarInformeWhatsapp(boletos, sorteoNums, sorteoReint, tablaPremios, 
       let sufijo='';
       if(categoria){
         algunPremio=true;
-        if(tablaPremios && tablaPremios[categoria]!=null){
-          const importe = tablaPremios[categoria]; totalPremios+=importe;
+        const propio = importesPorApuesta ? importesPorApuesta[`${boleto.id}:${idx+1}`] : undefined;
+        const importe = propio!=null ? propio
+          : ((tablaPremios && tablaPremios[categoria]!=null) ? tablaPremios[categoria] : null);
+        if(importe!=null){
+          totalPremios+=importe;
           sufijo = `  -> PREMIO categoría ${categoria}: ${eur(importe)}`;
-        } else sufijo = `  -> PREMIO categoría ${categoria} (importe no configurado)`;
+        } else sufijo = `  -> PREMIO categoría ${categoria} (importe pendiente de registrar)`;
         huella.push(`Boleto ${boleto.id} / apuesta ${idx+1}: ${categoria}`);
       }
       L.push(`  Apuesta ${idx+1}: ${texto}${sufijo}`);
@@ -1202,6 +1242,16 @@ async function publishState(){
 }
 function mostrarError(msg){ const el=$('errBanner'); el.textContent=msg; el.style.display='block'; }
 
+/* Precio de la apuesta que rige ahora mismo. Se usa el valor guardado
+   tal cual, incluido el cero: sustituirlo por el precio por defecto
+   haría que Generación calculase con 1,00 € un presupuesto que Reglas
+   está rechazando por precio inválido, y los dos paneles se
+   contradirían con el mismo estado. */
+function precioApuestaVigente(){
+  const r = STATE.rules;
+  return (r && r.precioApuesta!=null) ? r.precioApuesta : PRECIO_APUESTA_DEFECTO;
+}
+
 /* ============================================================
    Descargas: dentro del visor de Artifact un enlace/blob de
    descarga normal queda inerte, así que se ofrece primero por la
@@ -1318,10 +1368,20 @@ const UI = {
     row.querySelector('.pname').addEventListener('input', UI.updatePlayersSum);
     UI.updatePlayersSum();
   },
+  /* Solo cuentan los jugadores con nombre, igual que al guardar: una
+     fila en blanco no aporta 4 € y no debe inflar el presupuesto que
+     anuncia el plan. */
+  jugadoresEscritos(){
+    return Array.from(document.querySelectorAll('#playerRows .pname'))
+      .map(i=>i.value.trim()).filter(Boolean).length;
+  },
   updatePlayersSum(){
-    const n = document.querySelectorAll('#playerRows .playerrow').length;
+    const n = UI.jugadoresEscritos();
+    const filas = document.querySelectorAll('#playerRows .playerrow').length;
     const total = n*APORTACION_FIJA_JUGADOR;
-    $('playersSum').textContent = `${n} jugador${n===1?'':'es'} × ${eur(APORTACION_FIJA_JUGADOR)} = aportación mensual total ${eur(total)}`;
+    const pendientes = filas - n;
+    $('playersSum').textContent = `${n} jugador${n===1?'':'es'} × ${eur(APORTACION_FIJA_JUGADOR)} = aportación mensual total ${eur(total)}` +
+      (pendientes>0 ? ` · ${pendientes} fila${pendientes===1?'':'s'} sin nombre, que no cuenta${pendientes===1?'':'n'}` : '');
     UI.renderPlanPreview();
   },
   /* Plan en vivo mientras se editan las reglas. Simula el presupuesto
@@ -1330,7 +1390,7 @@ const UI = {
      premios que el fondo ya tiene acumulada. */
   renderPlanPreview(){
     if(!$('planPreview')) return;
-    const nJugadores = document.querySelectorAll('#playerRows .playerrow').length;
+    const nJugadores = UI.jugadoresEscritos();
     const precio = parseFloat($('r_betprice').value);
     const bolsaPremios = Finanzas.saldos(STATE.finance).premios;
     const saldos = {aportaciones: nJugadores*APORTACION_FIJA_JUGADOR, premios: bolsaPremios};
@@ -1463,7 +1523,7 @@ const UI = {
     const saldos = Finanzas.saldos(l);
     const total = Finanzas.total(saldos);
     const nJug = (STATE.rules && STATE.rules.players) ? STATE.rules.players.length : 0;
-    const precio = (STATE.rules && STATE.rules.precioApuesta) || PRECIO_APUESTA_DEFECTO;
+    const precio = precioApuestaVigente();
 
     $('fu_aport').textContent = eur(saldos.aportaciones);
     $('fu_aport_det').textContent = nJug
@@ -1524,6 +1584,17 @@ const UI = {
     if(!STATE.rules){ mostrarError('Configura primero las Reglas de la peña.'); return; }
     const tipo = $('f_type').value, importe = parseFloat($('f_amount').value);
     if(!(importe>0)){ mostrarError('Introduce un importe positivo.'); return; }
+    /* Un gasto nunca puede dejar el fondo en descubierto: el libro de
+       una peña no admite números rojos, porque ese dinero no existe. Es
+       la misma guarda que ya impide confirmar boletos más caros que el
+       fondo. */
+    if(tipo==='gasto'){
+      const disponible = Finanzas.saldoActual(STATE.finance);
+      if(importe > disponible + 0.001){
+        mostrarError(`No se puede anotar un gasto de ${eur(importe)}: el fondo solo tiene ${eur(disponible)}.`);
+        return;
+      }
+    }
     Finanzas.registrarMovimiento(STATE.finance, tipo, importe, {player:$('f_player').value.trim()||null, note:$('f_note').value.trim()||null});
     $('f_amount').value=''; $('f_player').value=''; $('f_note').value='';
     await publishState();
@@ -1545,7 +1616,7 @@ const UI = {
   planActual(){
     const r = STATE.rules;
     if(!r) return null;
-    return planSorteo(Finanzas.saldos(STATE.finance), r.precioApuesta || PRECIO_APUESTA_DEFECTO);
+    return planSorteo(Finanzas.saldos(STATE.finance), precioApuestaVigente());
   },
   renderGeneracion(){
     const r = STATE.rules;
@@ -1590,7 +1661,7 @@ const UI = {
     $('preview-tag').textContent = meta.metodo;
     let infoHtml = `${meta.numApuestasTotal} apuestas en ${meta.boletos.length} boletos · coste ${eur(meta.costeReal)} a ${eur(plan.precioApuesta)} la apuesta`;
     if(meta.metodo==='ANALISIS'){
-      infoHtml += `<br>Pool de ${meta.pool.length} números (semilla ${meta.semillaPool!=null?meta.semillaPool:'pool manual'}) · cota de Schönheim: ${meta.mMinTeorico} apuestas para cobertura teórica completa · cobertura alcanzada: ${(meta.coveragePct*100).toFixed(1)}% (${meta.subconjuntosCubiertos}/${meta.subconjuntosObjetivo})`;
+      infoHtml += `<br>Pool de ${meta.pool.length} números (semilla ${meta.semillaPool!=null?meta.semillaPool:'pool manual'}) · cota de Schönheim: ${meta.mMinTeorico} apuestas para cobertura teórica completa · cobertura alcanzada: ${porcentaje(meta.coveragePct*100)} (${meta.subconjuntosCubiertos}/${meta.subconjuntosObjetivo})`;
     }
     if(meta.numApuestasTotal < plan.apuestas){
       infoHtml += `<br>⚠ El presupuesto daba para ${plan.apuestas} apuestas, pero el pool elegido solo tiene combinaciones únicas de 6 números para ${meta.numApuestasTotal}. Se descontarán únicamente ${eur(meta.costeReal)}; amplía el tamaño del pool si quieres jugar el presupuesto entero.`;
@@ -1618,11 +1689,15 @@ const UI = {
       return;
     }
     const etiqueta = pendingDraw.fecha ? `Boletos del sorteo ${pendingDraw.fecha}` : 'Boletos del sorteo en curso';
+    const movId = 'sorteo-' + Date.now().toString(36);
     Finanzas.registrarMovimiento(STATE.finance, 'gasto', meta.costeReal, {
+      id: movId,
       note: `${etiqueta} · ${meta.numApuestasTotal} apuestas × ${eur(meta.plan.precioApuesta)}`
     });
+    const cyclicAntes = STATE.cyclic;
     if(r.method==='CICLICO') STATE.cyclic = pendingDraw.meta.cyclicStateFinal;
-    STATE.currentDraw = {fecha: pendingDraw.fecha, method: pendingDraw.meta.metodo, boletos: pendingDraw.meta.boletos, meta: pendingDraw.meta};
+    STATE.currentDraw = {fecha: pendingDraw.fecha, method: pendingDraw.meta.metodo, boletos: pendingDraw.meta.boletos,
+      meta: pendingDraw.meta, movId, cyclicAntes};
     pendingDraw = null;
     $('previewCard').style.display='none';
     await publishState();
@@ -1632,7 +1707,24 @@ const UI = {
     $('currentCard').style.display = d ? 'block' : 'none';
     if(!d) return;
     $('current-tag').textContent = (d.fecha?d.fecha+' · ':'') + d.method;
+    const apuestas = d.boletos.reduce((s,b)=>s+b.apuestas.length,0);
+    const coste = (d.meta && d.meta.costeReal) || 0;
+    $('currentInfo').textContent = `${apuestas} apuestas en ${d.boletos.length} boletos · ${eur(coste)} ya descontados del fondo.`;
     $('currentTickets').innerHTML = UI.renderTicketsHtml(d.boletos);
+  },
+  /* Confirmar gasta dinero de verdad, así que tiene que poder
+     deshacerse mientras el sorteo no se haya comprobado: se borra el
+     gasto del libro por su identificador y el cursor del método cíclico
+     vuelve a donde estaba antes de generar. */
+  async anularSorteoEnCurso(){
+    const d = STATE.currentDraw;
+    if(!d) return;
+    const coste = (d.meta && d.meta.costeReal) || 0;
+    if(!confirm(`¿Anular los boletos de este sorteo?\n\nSe borrarán las ${d.boletos.reduce((s,b)=>s+b.apuestas.length,0)} apuestas generadas y los ${eur(coste)} volverán al fondo. Úsalo solo si todavía no has rellenado los boletos de verdad.`)) return;
+    if(d.movId) Finanzas.eliminarMovimientoPorId(STATE.finance, d.movId);
+    if(d.cyclicAntes) STATE.cyclic = d.cyclicAntes;
+    STATE.currentDraw = null;
+    await publishState();
   },
 
   /* ================= SORTEO ================= */
@@ -1746,9 +1838,10 @@ const UI = {
        compartido con la peña se quedaría para siempre diciendo "importe no
        configurado" aunque el premio ya se haya registrado con su importe
        exacto — no sería coherente con los aciertos/premios registrados. */
-    const tablaActual = {};
-    last.prizes.forEach(pr => { if(pr.importe!=null) tablaActual[pr.categoria] = pr.importe; });
-    last.reportText = generarInformeWhatsapp(last.ticketsSnapshot, last.numeros, last.reintegro, tablaActual, last.fecha);
+    const importesPorApuesta = {};
+    last.prizes.forEach(pr => { if(pr.importe!=null) importesPorApuesta[`${pr.ticketId}:${pr.apuestaIdx}`] = pr.importe; });
+    last.reportText = generarInformeWhatsapp(last.ticketsSnapshot, last.numeros, last.reintegro,
+      STATE.rules.prizeTable, last.fecha, importesPorApuesta);
     await publishState();
   },
 
@@ -1757,7 +1850,7 @@ const UI = {
     const P = STATE.pena;
     const saldos = Finanzas.saldos(STATE.finance);
     const saldo = Finanzas.total(saldos);
-    const precio = (STATE.rules && STATE.rules.precioApuesta) || PRECIO_APUESTA_DEFECTO;
+    const precio = precioApuestaVigente();
     const plan = planSorteo(saldos, precio);
     const L=[`💼 *${(P.name||'Peña Baby Boom').toUpperCase()}* · Estado del fondo`, new Date().toLocaleDateString('es-ES'), '',
       `Fondo acumulado previo: ${eur(Finanzas.total(STATE.finance.previousFund||{}))}`,

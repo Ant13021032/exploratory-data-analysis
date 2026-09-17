@@ -21,7 +21,7 @@ function cargarLogica(){
      se añade un epílogo que lo recoge todo en un mismo objeto. */
   const epilogo = `
     globalThis.expuesto = {
-      pad, eur, signedEur, parseNumList, safeJsonForScript, AVISO_OBLIGATORIO,
+      pad, eur, signedEur, formatearImporte, porcentaje, parseNumList, safeJsonForScript, AVISO_OBLIGATORIO,
       Analisis, RNG, Finanzas,
       ORDEN_NUMEROS_CICLO, APORTACION_FIJA_JUGADOR, REINTEGROS_POR_FRECUENCIA,
       MIN_BOLETOS, MAX_APUESTAS_POR_BOLETO, PRECIO_APUESTA_DEFECTO, VERSION_ESTADO,
