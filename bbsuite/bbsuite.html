@@ -1,0 +1,1464 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#082A1E">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="BBSuite">
+<title>BBSuite · Baby Boom</title>
+<link id="manifestLink" rel="manifest" href="">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,440;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     BBSuite se compromete deliberadamente a un único mundo visual:
+     el tapete verde de una timba de sobremesa y el papel de un
+     cuaderno de cuentas escrito con tinta dorada y pluma roja.
+     Por eso no se define una variante clara/oscura: los colores se
+     pintan explícitamente para sostenerse igual sobre cualquier
+     fondo del visor.
+     ============================================================ */
+  :root{
+    --felt:#0B4A34; --felt-deep:#082A1E; --felt-line:#155440;
+    --paper:#FBF6EA; --paper-2:#F1E8D2; --paper-line:#DED0AC;
+    --ink:#20291D; --muted:#7C7259;
+    --gold:#C79A44; --gold-deep:#9c7530;
+    --pen:#A8342A; --ok:#2E7D4F; --warn:#A8342A;
+    --font-display:'Fraunces',Georgia,serif;
+    --font-mono:'IBM Plex Mono','Courier New',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{color-scheme:dark;}
+  body{margin:0;background:var(--felt-deep);font-family:var(--font-mono);color:var(--ink);padding-bottom:76px;font-variant-numeric:tabular-nums;}
+  header{text-align:center;padding:20px 14px 10px;color:var(--paper);}
+  header .eyebrow{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--gold);font-weight:700;}
+  header h1{font-family:var(--font-display);font-weight:600;font-size:26px;margin:4px 0 0;text-wrap:balance;}
+  header .sub{font-size:11px;color:#9db5a5;margin-top:3px;}
+
+  #roBanner{display:none;margin:0 10px 8px;padding:8px 12px;border-radius:6px;background:var(--pen);color:var(--paper);font-size:11px;font-weight:600;text-align:center;}
+  #errBanner{display:none;margin:0 10px 8px;padding:8px 12px;border-radius:6px;background:#4a2016;border:1px solid var(--pen);color:var(--paper);font-size:11px;}
+  #storeBanner{display:none;margin:0 10px 8px;padding:7px 12px;border-radius:6px;background:#123d2d;border:1px solid var(--felt-line);color:#cfe0d5;font-size:10.5px;text-align:center;line-height:1.5;}
+  #storeBanner.alerta{background:#4a2016;border-color:var(--pen);color:var(--paper);font-weight:600;}
+  #savingChip{display:none;position:fixed;top:10px;right:10px;background:var(--gold);color:var(--felt-deep);font-size:10px;font-weight:700;padding:5px 10px;border-radius:12px;z-index:80;letter-spacing:.5px;}
+
+  nav{display:flex;gap:4px;overflow-x:auto;padding:6px 10px 12px;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav button{flex:0 0 auto;padding:8px 13px;border-radius:20px;border:1px solid var(--gold);background:transparent;color:var(--gold);font-family:var(--font-mono);font-weight:600;font-size:11px;cursor:pointer;white-space:nowrap;}
+  nav button.active{background:var(--gold);color:var(--felt-deep);}
+
+  .panel{display:none;max-width:600px;margin:0 auto;}
+  .panel.active{display:block;}
+  .card{background:var(--paper);border-radius:9px;margin:9px 10px;padding:14px;box-shadow:0 5px 16px rgba(0,0,0,0.38);}
+  .card h2{font-family:var(--font-display);font-weight:600;font-size:16px;margin:0 0 9px;color:var(--felt-deep);border-bottom:1px solid var(--paper-line);padding-bottom:6px;text-wrap:balance;}
+  .card h2 small{font-family:var(--font-mono);font-size:9.5px;color:var(--muted);font-weight:500;float:right;margin-top:4px;letter-spacing:.3px;}
+  .card h3{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--felt);margin:14px 0 6px;}
+  label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);display:block;margin:8px 0 3px;}
+  input,select,textarea{width:100%;padding:9px;border:1px solid var(--paper-line);border-radius:6px;font-family:var(--font-mono);font-size:14px;background:#fff;color:var(--ink);}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--gold);outline-offset:1px;}
+  textarea{resize:vertical;min-height:56px;}
+  .row{display:flex;gap:8px;}
+  .row>div{flex:1;min-width:0;}
+  .btn{display:block;width:100%;padding:12px;margin-top:10px;border:none;border-radius:26px;font-family:var(--font-mono);font-weight:700;font-size:13.5px;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,0.25);}
+  .btn:focus-visible{outline:2px solid var(--felt-deep);outline-offset:2px;}
+  .btn-primary{background:var(--felt);color:var(--paper);}
+  .btn-gold{background:var(--gold);color:var(--felt-deep);}
+  .btn-ghost{background:transparent;color:var(--felt);border:1.5px solid var(--felt);box-shadow:none;}
+  .btn-danger{background:transparent;color:var(--pen);border:1.5px solid var(--pen);box-shadow:none;}
+  .btn-sm{width:auto;display:inline-block;padding:6px 11px;font-size:11px;margin-top:0;border-radius:16px;}
+  .hint{font-size:10.5px;color:var(--muted);margin-top:6px;line-height:1.5;}
+  .notice{font-size:10.5px;color:var(--felt-deep);background:var(--paper-2);border-left:3px solid var(--gold);padding:8px 10px;margin:9px 0;border-radius:0 6px 6px 0;line-height:1.55;white-space:pre-line;}
+  .pill{display:inline-block;font-size:9.5px;padding:2px 8px;border-radius:12px;background:var(--paper-2);border:1px solid var(--paper-line);color:var(--muted);margin:2px 3px 0 0;}
+  .pill.ok{background:#e2efe4;border-color:var(--ok);color:var(--ok);font-weight:700;}
+  .pill.warn{background:#f4e0da;border-color:var(--pen);color:var(--pen);font-weight:700;}
+  .errlist{font-size:11px;color:var(--pen);background:#f4e0da;border-radius:6px;padding:8px 10px;margin-top:8px;line-height:1.6;}
+
+  .combo{display:flex;align-items:center;gap:4px;padding:3px 0;font-size:13px;flex-wrap:wrap;}
+  .combo .idx{width:20px;color:var(--muted);font-size:9.5px;}
+  .num{position:relative;width:25px;height:25px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#3a352a;}
+  .num.hit{color:var(--pen);font-weight:700;font-size:15px;}
+  .combo .tag{margin-left:auto;font-size:9px;color:var(--muted);white-space:nowrap;}
+  .combo.prize .tag{color:var(--pen);font-weight:700;}
+
+  .boleto{background:var(--paper-2);border:1px solid var(--paper-line);border-radius:6px;padding:10px 12px;margin-top:9px;}
+  .boleto-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;font-size:12.5px;font-weight:700;color:var(--felt-deep);}
+  .rtag{font-size:9.5px;padding:2px 8px;border-radius:14px;font-weight:700;background:#B9B2A0;color:#fff;}
+  .rtag.win{background:var(--pen);}
+
+  table{border-collapse:collapse;width:100%;font-size:11px;margin-top:8px;}
+  th,td{border:1px solid var(--paper-line);padding:5px 4px;text-align:center;}
+  th{background:var(--felt);color:var(--paper);font-size:9px;text-transform:uppercase;letter-spacing:.3px;}
+  td.l{text-align:left;}
+  tr.win td{background:#f3e6c9;}
+  .tablewrap{overflow-x:auto;}
+
+  .totals{margin-top:9px;padding:11px 12px;background:var(--felt-deep);color:var(--paper);border-radius:6px;font-size:11.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:5px 10px;}
+  .totals b{color:var(--gold);}
+
+  .kb-item{background:var(--paper-2);border-left:3px solid var(--gold);padding:8px 10px;margin-top:7px;border-radius:0 6px 6px 0;font-size:11.5px;}
+  .kb-item .kb-meta{font-size:9px;color:var(--muted);margin-bottom:2px;}
+  .empty{font-size:11.5px;color:var(--muted);font-style:italic;padding:6px 0;}
+  #installBar{position:fixed;bottom:0;left:0;right:0;background:var(--gold);color:var(--felt-deep);padding:10px 14px;font-size:12px;font-weight:700;display:none;align-items:center;gap:10px;justify-content:center;z-index:50;}
+  #installBar button{background:var(--felt-deep);color:var(--gold);border:none;border-radius:20px;padding:7px 14px;font-family:var(--font-mono);font-weight:700;cursor:pointer;}
+  .betrow{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:11.5px;}
+  .betrow input{width:52px;padding:5px;text-align:center;flex:0 0 auto;}
+  .playerrow{display:flex;gap:8px;align-items:center;margin-top:5px;}
+  .playerrow input{flex:1;}
+  .playerrow .amt-fixed{flex:0 0 78px;text-align:right;font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--felt-deep);}
+  .xbtn{flex:0 0 auto;background:transparent;border:1px solid var(--pen);color:var(--pen);border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:13px;line-height:1;}
+</style>
+
+<header>
+  <div class="eyebrow">BBSuite</div>
+  <h1>Peña Baby Boom</h1>
+  <div class="sub">Cuaderno de la peña · La Primitiva 6/49 + Reintegro</div>
+</header>
+
+<div id="roBanner">👁 Estás viendo la peña en modo solo lectura: tus cambios no se compartirán con el resto de jugadores.</div>
+<div id="errBanner"></div>
+<div id="storeBanner"></div>
+<div id="savingChip">guardando…</div>
+
+<nav id="nav">
+  <button data-p="reglas" class="active">⚙ Reglas</button>
+  <button data-p="finanzas">💰 Finanzas</button>
+  <button data-p="generacion">🎲 Generación</button>
+  <button data-p="sorteo">✔ Sorteo</button>
+  <button data-p="resumen">📤 Resumen</button>
+  <button data-p="investigacion">📊 Investigación</button>
+  <button data-p="conocimiento">📚 Conocimiento</button>
+</nav>
+
+<!-- ================= REGLAS ================= -->
+<div class="panel active" id="panel-reglas">
+  <div id="reglas-empty" class="card" style="display:none;">
+    <h2>Todavía no hay configuración</h2>
+    <div class="hint">Esta peña juega con boletos gratuitos: no hay precio por apuesta ni gasto en generarlos, solo el tiempo de rellenarlos. La aplicación no asume por su cuenta la cuota de cada jugador ni el número de apuestas por sorteo: complétalos aquí antes de generar ningún boleto. El importe de cada premio se introduce al comprobar el sorteo, no aquí.</div>
+  </div>
+
+  <div class="card">
+    <h2>Jugadores y aportación mensual</h2>
+    <div class="hint">Cada jugador aporta siempre 4 € al mes. Ese total (jugadores × 4 €) se suma a lo acumulado por reintegros y premios pequeños ya reinvertidos, y se juega todo en cada sorteo — salvo que haya habido un premio grande, cuya parte no reinvertida sale del reparto.</div>
+    <h3>Jugadores</h3>
+    <div id="playerRows"></div>
+    <button class="btn btn-ghost" onclick="UI.addPlayerRow()">＋ Añadir jugador</button>
+    <div class="hint" id="playersSum"></div>
+  </div>
+
+  <div class="card">
+    <h2>Boletos</h2>
+    <label>Número de boletos (mínimo 10)</label><input type="number" min="10" id="r_numtickets">
+    <label>Apuestas a generar por sorteo</label><input type="number" min="10" id="r_numapuestas">
+    <div class="hint">Como los boletos son gratuitos, no hay presupuesto que limite cuántas apuestas se juegan: decides aquí el total. Se reparten automáticamente entre los boletos por turnos (round-robin), con un máximo de 8 apuestas por boleto.</div>
+  </div>
+
+  <div class="card">
+    <h2>Método de generación</h2>
+    <select id="r_method" onchange="UI.renderMethodParams()">
+      <option value="ANALISIS">Análisis (sistema reducido)</option>
+      <option value="ALEATORIO">Aleatorio puro</option>
+      <option value="CICLICO">Cíclico (orden por frecuencia histórica real)</option>
+    </select>
+    <div id="methodParams"></div>
+  </div>
+
+  <div class="card">
+    <h2>Fondo de la peña</h2>
+    <div class="hint">Los boletos son gratuitos: generarlos y confirmarlos no descuenta nada del fondo. El fondo solo crece con las aportaciones mensuales (4 €/jugador) y con los premios — se guarda para lo que decida la peña, nunca se gasta en jugar.</div>
+    <div class="row">
+      <div><label>Umbral premio pequeño (€)</label><input type="number" step="0.5" id="r_smallthr"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div id="r_errors"></div>
+    <button class="btn btn-primary" onclick="UI.saveReglas()">💾 Guardar reglas</button>
+  </div>
+
+  <div class="card">
+    <h2>Copia de seguridad de la peña</h2>
+    <div class="hint">Todo lo que ves en la aplicación (reglas, jugadores, fondo, libro de operaciones, boletos en curso e historial de sorteos) queda guardado en este dispositivo en cuanto lo tocas. Para llevártelo a otro —del portátil al móvil, o al cambiar de teléfono— exporta el fichero aquí y luego impórtalo en el otro dispositivo.</div>
+    <div id="storeState" class="notice"></div>
+    <button class="btn btn-gold" onclick="UI.exportarEstado()">⬇ Exportar copia de seguridad (.json)</button>
+    <label for="st_import">Importar copia de seguridad</label>
+    <input type="file" id="st_import" accept=".json" onchange="UI.importarEstado(this)">
+    <div class="hint">Importar sustituye <b>todos</b> los datos de este dispositivo por los del fichero. La aplicación te pedirá confirmación y te dirá de qué fecha es cada copia antes de hacerlo.</div>
+    <button class="btn btn-danger" onclick="UI.olvidarLocal()">🧹 Borrar la copia de este dispositivo</button>
+  </div>
+</div>
+
+<!-- ================= FINANZAS ================= -->
+<div class="panel" id="panel-finanzas">
+  <div class="card">
+    <h2>Fondo de la peña</h2>
+    <div class="totals" id="fundTotals"></div>
+    <h3>Registrar movimiento</h3>
+    <div class="row">
+      <div><label>Tipo</label>
+        <select id="f_type">
+          <option value="aportacion">Aportación</option>
+          <option value="gasto">Gasto manual</option>
+          <option value="reinversion">Reinversión</option>
+        </select>
+      </div>
+      <div><label>Importe (€)</label><input type="number" step="0.01" id="f_amount"></div>
+    </div>
+    <div class="row">
+      <div><label>Jugador (si aplica)</label><input type="text" id="f_player"></div>
+      <div><label>Nota</label><input type="text" id="f_note"></div>
+    </div>
+    <button class="btn btn-ghost" onclick="UI.addMovimiento()">＋ Añadir movimiento</button>
+  </div>
+  <div class="card">
+    <h2>Libro de operaciones</h2>
+    <div class="tablewrap" id="ledger"></div>
+  </div>
+  <div class="card">
+    <h2>Conciliación mensual</h2>
+    <div class="hint">Cierra el mes: el saldo actual pasa a ser el fondo acumulado del próximo mes y el libro queda archivado en el historial de conciliaciones.</div>
+    <button class="btn btn-gold" onclick="UI.conciliar()">📗 Conciliar mes y archivar libro</button>
+  </div>
+</div>
+
+<!-- ================= GENERACIÓN ================= -->
+<div class="panel" id="panel-generacion">
+  <div class="card">
+    <h2>Generar boletos del próximo sorteo <small id="gen-method-tag"></small></h2>
+    <label>Fecha del sorteo</label><input type="text" id="g_date" placeholder="p. ej. primeros de septiembre 2026">
+    <div class="notice" id="g_presupuesto"></div>
+    <button class="btn btn-primary" onclick="UI.previsualizarBoletos()">🎲 Previsualizar boletos</button>
+    <div class="hint">La previsualización no gasta nada del fondo ni mueve el cursor del método cíclico. Solo se compromete al confirmar.</div>
+  </div>
+  <div class="card" id="previewCard" style="display:none;">
+    <h2>Vista previa <small id="preview-tag"></small></h2>
+    <div id="previewInfo" class="hint"></div>
+    <div id="previewTickets"></div>
+    <button class="btn btn-gold" onclick="UI.confirmarBoletos()">✔ Confirmar boletos</button>
+  </div>
+  <div class="card" id="currentCard" style="display:none;">
+    <h2>Boletos del sorteo en curso <small id="current-tag"></small></h2>
+    <div id="currentTickets"></div>
+  </div>
+</div>
+
+<!-- ================= SORTEO ================= -->
+<div class="panel" id="panel-sorteo">
+  <div class="card">
+    <h2>Introducir resultado del sorteo</h2>
+    <div id="sorteo-empty" class="empty" style="display:none;">Todavía no hay boletos confirmados de ningún sorteo para comparar.</div>
+    <div id="sorteo-form">
+      <label>Números ganadores (6, separados por espacios o comas)</label>
+      <input type="text" id="s_nums" placeholder="3 12 18 25 33 49">
+      <label>Reintegro</label><input type="number" min="0" max="9" id="s_reint">
+      <button class="btn btn-primary" onclick="UI.comprobarResultado()">✔ Comprobar y registrar</button>
+    </div>
+  </div>
+  <div id="sorteoResults"></div>
+</div>
+
+<!-- ================= RESUMEN ================= -->
+<div class="panel" id="panel-resumen">
+  <div class="card">
+    <h2>Parte para la peña</h2>
+    <div class="hint">Texto listo para pegar en WhatsApp. Los aciertos se marcan con círculo Unicode; no lo reformatees al compartirlo.</div>
+    <label>Contenido</label>
+    <select id="rp_kind" onchange="UI.previewInforme()">
+      <option value="ultimo">Último resultado comprobado</option>
+      <option value="cartera">Boletos del sorteo en curso</option>
+      <option value="fondo">Estado del fondo</option>
+    </select>
+    <button class="btn btn-primary" onclick="UI.previewInforme(true)">🔄 Generar</button>
+    <label>Vista previa (editable antes de enviar)</label>
+    <textarea id="rp_text" style="min-height:240px;font-size:11.5px;line-height:1.5;"></textarea>
+    <button class="btn btn-ghost" onclick="UI.shareWhatsapp()">💬 Enviar por WhatsApp</button>
+    <div class="row">
+      <div><button class="btn btn-ghost" onclick="UI.copyInforme()">📋 Copiar</button></div>
+      <div><button class="btn btn-ghost" onclick="UI.downloadInforme()">⬇ Guardar .txt</button></div>
+    </div>
+    <div class="hint" id="rp_status"></div>
+  </div>
+</div>
+
+<!-- ================= INVESTIGACIÓN ================= -->
+<div class="panel" id="panel-investigacion">
+  <div class="card">
+    <h2>Historial de sorteos</h2>
+    <div id="metrics"></div>
+  </div>
+</div>
+
+<!-- ================= CONOCIMIENTO (solo local) ================= -->
+<div class="panel" id="panel-conocimiento">
+  <div class="card">
+    <h2>Base de conocimiento <small>solo en este dispositivo</small></h2>
+    <div class="hint">Lecciones, decisiones y observaciones sobre la peña. A diferencia del resto de módulos, esto NO se comparte con otros jugadores: vive únicamente en este navegador.</div>
+    <label>Nueva anotación</label>
+    <textarea id="j_text" placeholder="Ej.: se decide bajar la garantía a 3 aciertos porque..."></textarea>
+    <select id="j_type"><option>Lección</option><option>Decisión</option><option>Observación</option></select>
+    <button class="btn btn-ghost" onclick="UI.addKb()">＋ Registrar</button>
+    <div id="kb"></div>
+  </div>
+  <div class="card">
+    <h2>Copia de estas notas</h2>
+    <button class="btn btn-gold" onclick="UI.exportKb()">⬇ Exportar a fichero .json</button>
+    <input type="file" id="kb_import" accept=".json" onchange="UI.importKb(this)" style="margin-top:8px;">
+  </div>
+</div>
+
+<div id="installBar"><span>Instala BBSuite en tu móvil</span><button id="installBtn">Instalar</button></div>
+
+<script id="bb-state-data" type="application/json">{}</script>
+<script>
+"use strict";
+/* ============================================================
+   Utilidades básicas
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2,'0');
+const eur = n => (Number(n)||0).toFixed(2).replace('.',',') + ' €';
+const signedEur = n => (n>=0?'+':'-') + Math.abs(Number(n)||0).toFixed(2).replace('.',',') + ' €';
+function parseNumList(str){
+  return (String(str||'').match(/\d+/g)||[]).map(Number);
+}
+function safeJsonForScript(obj){
+  return JSON.stringify(obj).replace(/<\//g, '<\\/');
+}
+
+/* ============================================================
+   AVISO OBLIGATORIO — texto literal del documento de diseño
+   auditado por el equipo de Análisis / Control de Calidad.
+   ============================================================ */
+const AVISO_OBLIGATORIO =
+"AVISO DE RIGOR MATEMATICO\n" +
+"En La Primitiva, las 13.983.816 combinaciones posibles de 6 numeros entre " +
+"49 (C(49,6)) tienen exactamente la misma probabilidad matematica de " +
+"resultar premiadas con el premio mayor: 1/13.983.816. Ningun sistema de " +
+"generacion -incluido el \"Metodo Analisis\"- altera esa probabilidad ni " +
+"predice resultados. El Metodo Analisis optimiza cobertura combinatoria " +
+"(maximizar las combinaciones de 3-4 aciertos garantizadas dado un " +
+"presupuesto) y la gestion financiera del fondo, no la probabilidad de " +
+"acertar. Los metodos Aleatorio y Ciclico se ofrecen como alternativas de " +
+"generacion sin pretension estadistica alguna.";
+
+/* ============================================================
+   analisis.js — combinatoria, cota de Schönheim y filtros
+   estadísticos. Puerto literal de analisis.py.
+   ============================================================ */
+const Analisis = {
+  combinaciones(n,k){
+    if(k<0||n<0||k>n) return 0;
+    let r=1;
+    for(let i=0;i<k;i++) r = r*(n-i)/(i+1);
+    return Math.round(r);
+  },
+  schonheim(v,k,t){
+    if(t===0) return 1;
+    if(t===1) return Math.ceil(v/k);
+    return Math.ceil((v/k) * Analisis.schonheim(v-1,k-1,t-1));
+  },
+  mMinTeorico(nPool,garantia){ return Analisis.schonheim(nPool,6,garantia); },
+
+  filtroParidad(ap,p){ const pares=ap.filter(n=>n%2===0).length; return pares>=(p.minEven??1) && pares<=(p.maxEven??5); },
+  filtroConsecutivos(ap,p){
+    const o=ap.slice().sort((a,b)=>a-b); let racha=1,max=1;
+    for(let i=1;i<o.length;i++){ if(o[i]===o[i-1]+1){ racha++; max=Math.max(max,racha); } else racha=1; }
+    return max <= (p.maxRun??3);
+  },
+  decada(n){ return Math.floor((n-1)/10); },
+  filtroDecenas(ap,p){
+    for(const g of [0,1,2,3,4]){ if(ap.filter(n=>Analisis.decada(n)===g).length > (p.maxPerDecade??3)) return false; }
+    return true;
+  },
+  filtroSuma(ap,p){
+    const s=ap.reduce((a,b)=>a+b,0);
+    const media=p.mean??150.0, desv=p.stdev??32.79, k=p.kSigma??1.5;
+    return s >= (media-k*desv) && s <= (media+k*desv);
+  },
+  filtroAltoBajo(ap,p){
+    const corte=p.cutoff??24, min=p.minPerSide??1;
+    const bajos=ap.filter(n=>n<=corte).length, altos=ap.length-bajos;
+    return bajos>=min && altos>=min;
+  },
+  filtroTerminaciones(ap,p){
+    for(let d=0;d<10;d++){ if(ap.filter(n=>(n%10)===d).length > (p.maxSameEnding??2)) return false; }
+    return true;
+  },
+  aplicarFiltros(apuesta, filtros){
+    const F = {
+      parity: Analisis.filtroParidad, consecutive: Analisis.filtroConsecutivos,
+      decades: Analisis.filtroDecenas, sum: Analisis.filtroSuma,
+      highLow: Analisis.filtroAltoBajo, endings: Analisis.filtroTerminaciones
+    };
+    for(const nombre in F){
+      const cfg = (filtros && filtros[nombre]) || {};
+      if(!cfg.active) continue;
+      if(!F[nombre](apuesta,cfg)) return false;
+    }
+    return true;
+  },
+  combosArray(arr,k){
+    const res=[]; const a=arr.slice();
+    const rec=(start,cur)=>{
+      if(cur.length===k){ res.push(cur.slice()); return; }
+      for(let i=start;i<a.length;i++){ cur.push(a[i]); rec(i+1,cur); cur.pop(); }
+    };
+    rec(0,[]);
+    return res;
+  },
+  construirSistemaReducido(pool, t, mDisponibles, filtros, umbralEnum, numCandMuestreo, rng){
+    pool = pool.slice().sort((a,b)=>a-b);
+    const nPool = pool.length;
+    if(nPool<6) return {sistema:[],cubiertos:0,totalObjetivo:0,pct:0};
+    const objetivo = new Set(Analisis.combosArray(pool,t).map(c=>c.join(',')));
+    const totalObjetivo = objetivo.size;
+    const cubiertos = new Set();
+    const sistema = []; const sistemaSet = new Set();
+    const totalHexadas = Analisis.combinaciones(nPool,6);
+
+    while(sistema.length < mDisponibles && cubiertos.size < totalObjetivo){
+      let candidatos;
+      if(totalHexadas <= umbralEnum){
+        candidatos = Analisis.combosArray(pool,6).filter(c=>!sistemaSet.has(c.join(',')));
+      } else {
+        candidatos = []; const vistos = new Set();
+        let intentos=0; const maxIntentos = numCandMuestreo*30;
+        while(candidatos.length<numCandMuestreo && intentos<maxIntentos){
+          intentos++;
+          const c = RNG.sample(rng,pool,6).sort((a,b)=>a-b);
+          const key=c.join(',');
+          if(sistemaSet.has(key)||vistos.has(key)) continue;
+          vistos.add(key); candidatos.push(c);
+        }
+      }
+      let validos = candidatos.filter(c=>Analisis.aplicarFiltros(c,filtros));
+      if(!validos.length) validos = candidatos;
+      if(!validos.length) break;
+
+      let mejor=null, mejorGan=-1;
+      for(const cand of validos){
+        const subs = Analisis.combosArray(cand,t);
+        let gan=0;
+        for(const s of subs){ if(!cubiertos.has(s.join(','))) gan++; }
+        if(gan>mejorGan){ mejorGan=gan; mejor=cand; }
+      }
+      if(mejor===null || mejorGan===0) break;
+      sistema.push(mejor); sistemaSet.add(mejor.join(','));
+      for(const s of Analisis.combosArray(mejor,t)) cubiertos.add(s.join(','));
+    }
+
+    let intentosRelleno=0; const maxRelleno = Math.max(mDisponibles,1)*300;
+    while(sistema.length<mDisponibles && intentosRelleno<maxRelleno){
+      intentosRelleno++;
+      const cand = RNG.sample(rng,pool,6).sort((a,b)=>a-b);
+      const key=cand.join(',');
+      if(sistemaSet.has(key)) continue;
+      if(!Analisis.aplicarFiltros(cand,filtros)) continue;
+      sistema.push(cand); sistemaSet.add(key);
+    }
+
+    if(sistema.length<mDisponibles){
+      if(totalHexadas<=300000){
+        let restantes = Analisis.combosArray(pool,6).filter(c=>!sistemaSet.has(c.join(',')));
+        for(let i=restantes.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [restantes[i],restantes[j]]=[restantes[j],restantes[i]]; }
+        for(const c of restantes){ if(sistema.length>=mDisponibles) break; sistema.push(c); sistemaSet.add(c.join(',')); }
+      } else {
+        let intentos=0;
+        while(sistema.length<mDisponibles && intentos<20000){
+          intentos++;
+          const c = RNG.sample(rng,pool,6).sort((a,b)=>a-b);
+          const key=c.join(',');
+          if(sistemaSet.has(key)) continue;
+          sistema.push(c); sistemaSet.add(key);
+        }
+      }
+    }
+    const pct = totalObjetivo ? cubiertos.size/totalObjetivo : 0;
+    return {sistema, cubiertos:cubiertos.size, totalObjetivo, pct};
+  }
+};
+
+/* PRNG con semilla (mulberry32) — permite registrar y auditar la
+   semilla del muestreo del pool, igual que random.Random(semilla)
+   en Python. */
+const RNG = {
+  make(seed){
+    let s = seed>>>0;
+    return function(){
+      s = (s + 0x6D2B79F5) | 0;
+      let t = Math.imul(s ^ (s>>>15), 1 | s);
+      t = (t + Math.imul(t ^ (t>>>7), 61 | t)) ^ t;
+      return ((t ^ (t>>>14)) >>> 0) / 4294967296;
+    };
+  },
+  randomSeed(){ return (Math.floor(Math.random()*2147483647))>>>0; },
+  sample(rng, arr, k){
+    const a = arr.slice();
+    for(let i=0;i<k;i++){ const j = i + Math.floor(rng()*(a.length-i)); [a[i],a[j]]=[a[j],a[i]]; }
+    return a.slice(0,k);
+  }
+};
+
+/* ============================================================
+   generacion.js — los tres métodos y el reparto en boletos.
+   Puerto literal de generacion.py.
+   ============================================================ */
+/* Orden del ciclo de números 1-49, derivado de la frecuencia real de
+   aparición en el histórico completo de sorteos de La Primitiva
+   (Lotoideas.com, 3.823 sorteos, 1985-2024): el número más veces salido
+   ocupa la primera posición del ciclo y así sucesivamente hasta el menos
+   frecuente. Usa los 49 números (ninguno se salta), pero en el orden real
+   de frecuencia y no en tramos consecutivos (1,2,3... o 30,31,32...), que
+   no se corresponde con ningún patrón real de sorteos. Como recuerda el
+   aviso de rigor matemático: la frecuencia pasada no altera la
+   probabilidad futura de cada número (1/49 para cualquiera de ellos); es
+   solo el orden en que el método Cíclico los va probando. */
+const ORDEN_NUMEROS_CICLO = [3,1,45,38,47,39,41,11,30,40,23,5,15,22,37,29,36,10,14,19,7,6,28,43,48,26,42,34,35,12,21,9,17,2,16,46,44,32,27,13,31,18,33,4,24,49,8,25,20];
+const APORTACION_FIJA_JUGADOR = 4; // cada jugador aporta siempre 4€/mes, fijo
+function valorCiclico(indice){
+  const offset = (indice-1) % 49;
+  return ORDEN_NUMEROS_CICLO[offset];
+}
+function siguienteApuestaCiclicaPura(estado){
+  const numeros=[]; let idx = estado.lastIndexUsed||0;
+  while(numeros.length<6){ idx++; const v=valorCiclico(idx); if(!numeros.includes(v)) numeros.push(v); }
+  return [numeros.slice().sort((a,b)=>a-b), {lastIndexUsed:idx, lastRunDate:new Date().toISOString()}];
+}
+function generarApuestasCiclicas(estadoInicial, cantidad){
+  let estado = estadoInicial;
+  const apuestas=[];
+  for(let i=0;i<cantidad;i++){ const [nums, nuevo] = siguienteApuestaCiclicaPura(estado); apuestas.push(nums); estado=nuevo; }
+  return {apuestas, estadoFinal:estado};
+}
+function generarApuestaAleatoria(rng){ return RNG.sample(rng, Array.from({length:49},(_,i)=>i+1), 6).sort((a,b)=>a-b); }
+/* Reintegros 0-9 ordenados de más a menos frecuente en el mismo histórico
+   real (3.823 sorteos, 1985-2024, Lotoideas.com). Igual que con los
+   números, la frecuencia pasada no cambia la probabilidad futura (cada
+   reintegro tiene 1/10): es solo el criterio de reparto entre boletos. */
+const REINTEGROS_POR_FRECUENCIA = [8,5,2,3,1,6,9,4,7,0];
+/* Asigna un reintegro a cada boleto ya repartido (boletosApuestas: array de
+   arrays de apuestas). El reintegro estadísticamente más frecuente se
+   asigna al boleto con más líneas de apuesta, el siguiente más frecuente
+   al siguiente boleto con más líneas, y así sucesivamente — nunca en
+   orden correlativo de boleto. Con 10 boletos o más se siguen usando los
+   10 reintegros 0-9 al menos una vez cada uno (repitiendo por frecuencia
+   si sobran boletos), así que el reintegro real, sea cual sea, siempre
+   coincide con algún boleto. */
+function asignarReintegros(boletosApuestas){
+  const orden = boletosApuestas.map((ap,i)=>({i, len:ap.length})).sort((a,b)=> b.len-a.len || a.i-b.i);
+  const reintegros = new Array(boletosApuestas.length);
+  orden.forEach((o,rank)=>{ reintegros[o.i] = REINTEGROS_POR_FRECUENCIA[rank%10]; });
+  return reintegros;
+}
+function muestrearPoolAleatorio(nPool, semilla){
+  if(semilla===null || semilla===undefined) semilla = RNG.randomSeed();
+  const rng = RNG.make(semilla);
+  const pool = RNG.sample(rng, Array.from({length:49},(_,i)=>i+1), nPool).sort((a,b)=>a-b);
+  return {pool, semilla};
+}
+/* El número de apuestas por boleto no se configura a mano: sale del
+   presupuesto del sorteo. Se reparte por turnos (round-robin) entre
+   los boletos, así que cada boleto recibe ceil(total/numBoletos) o
+   floor(total/numBoletos) apuestas -aproximando siempre al entero
+   superior primero y completando boleto a boleto- sin superar nunca
+   el límite de 8 apuestas por boleto. */
+function repartirApuestasEnBoletos(apuestas, numBoletos){
+  apuestas = apuestas.slice();
+  const boletos = Array.from({length:numBoletos},()=>[]);
+  let i=0, b=0, safety=0;
+  while(i<apuestas.length){
+    if(boletos[b%numBoletos].length<8){ boletos[b%numBoletos].push(apuestas[i].slice()); i++; }
+    b++; safety++;
+    if(safety>numBoletos*10000) break; /* salvaguarda: todos los boletos llegaron al límite de 8 */
+  }
+  return boletos;
+}
+/* Genera un sorteo completo (previsualización pura, sin efectos
+   secundarios sobre el estado compartido: el llamador decide si
+   confirma y persiste). */
+function generarBoletos(rules, numApuestasTotal, cyclicState){
+  const numBoletos = rules.numTickets;
+  const meta = {metodo: rules.method};
+  let apuestasPlanas, cyclicStateFinal = cyclicState;
+
+  if(rules.method==='ANALISIS'){
+    const a = rules.analysis;
+    let pool, semillaUsada;
+    if(a.poolMode==='manual'){ pool = a.poolManual.slice().sort((x,y)=>x-y); semillaUsada=null; }
+    else { const r = muestrearPoolAleatorio(a.poolSize, a.poolSeed); pool=r.pool; semillaUsada=r.semilla; }
+    meta.pool = pool; meta.semillaPool = semillaUsada;
+    meta.mMinTeorico = Analisis.mMinTeorico(pool.length, a.guarantee);
+    const rng = RNG.make(semillaUsada!==null? semillaUsada : RNG.randomSeed());
+    const resultado = Analisis.construirSistemaReducido(pool, a.guarantee, numApuestasTotal, rules.filters, a.enumThreshold, a.sampleCandidates, rng);
+    apuestasPlanas = resultado.sistema;
+    meta.coveragePct = resultado.pct; meta.subconjuntosCubiertos = resultado.cubiertos; meta.subconjuntosObjetivo = resultado.totalObjetivo;
+  } else if(rules.method==='ALEATORIO'){
+    const rng = RNG.make(RNG.randomSeed());
+    apuestasPlanas = Array.from({length:numApuestasTotal},()=>generarApuestaAleatoria(rng));
+  } else if(rules.method==='CICLICO'){
+    const r = generarApuestasCiclicas(cyclicState, numApuestasTotal);
+    apuestasPlanas = r.apuestas; cyclicStateFinal = r.estadoFinal;
+  } else throw new Error('Método de generación desconocido: '+rules.method);
+
+  const boletosApuestas = repartirApuestasEnBoletos(apuestasPlanas, numBoletos);
+  const reintegros = asignarReintegros(boletosApuestas);
+  const boletos = [];
+  for(let i=0;i<numBoletos;i++) boletos.push({id:i+1, reintegro:reintegros[i], apuestas:boletosApuestas[i]});
+  meta.boletos = boletos;
+  meta.numApuestasTotal = boletos.reduce((s,b)=>s+b.apuestas.length,0);
+  meta.cyclicStateFinal = cyclicStateFinal;
+  return meta;
+}
+
+/* ============================================================
+   finanzas.js — libro de operaciones y política del fondo.
+   Puerto literal de finanzas.py.
+   ============================================================ */
+const Finanzas = {
+  saldoActual(ledger){ return ledger.movements.length ? ledger.movements[ledger.movements.length-1].balance : ledger.previousFund; },
+  registrarMovimiento(ledger, tipo, importe, opts){
+    opts = opts||{};
+    const anterior = Finanzas.saldoActual(ledger);
+    let nuevo;
+    if(tipo==='aportacion') nuevo = anterior + importe;
+    else if(tipo==='gasto') nuevo = anterior - importe;
+    else if(tipo==='reinversion') nuevo = anterior + importe;
+    else if(tipo==='premio') nuevo = anterior;
+    else throw new Error('Tipo de movimiento desconocido: '+tipo);
+    ledger.movements.push({
+      date: opts.date || new Date().toISOString().slice(0,10), type:tipo,
+      player: opts.player||null, ticketId: opts.ticketId!=null?opts.ticketId:null,
+      amount: Math.round(importe*100)/100, balance: Math.round(nuevo*100)/100, note: opts.note||null
+    });
+    return ledger;
+  },
+  /* Recalcula el saldo acumulado de cada movimiento desde el fondo previo,
+     en orden. Necesario tras borrar un movimiento intermedio (p.ej. una
+     aportación duplicada por error), para que el saldo de cada fila y el
+     saldo final sigan siendo correctos. */
+  recalcularBalances(ledger){
+    let saldo = ledger.previousFund;
+    ledger.movements.forEach(m=>{
+      if(m.type==='aportacion' || m.type==='reinversion') saldo += m.amount;
+      else if(m.type==='gasto') saldo -= m.amount;
+      /* 'premio' es solo informativo: el dinero entra por su propio
+         movimiento de 'reinversion' (automática o decidida), no aquí. */
+      m.balance = Math.round(saldo*100)/100;
+    });
+    return ledger;
+  },
+  eliminarMovimiento(ledger, index){
+    if(index<0 || index>=ledger.movements.length) return ledger;
+    ledger.movements.splice(index,1);
+    return Finanzas.recalcularBalances(ledger);
+  },
+  clasificarUmbralPremio(importe,umbral){ return importe<umbral ? 'pequeno':'grande'; },
+  procesarPremio(ledger, importe, umbral, categoria, opts){
+    opts = opts||{};
+    const tipo = Finanzas.clasificarUmbralPremio(importe,umbral);
+    if(tipo==='grande' && !opts.confirmarGrande){
+      return {procesado:false, tipoUmbral:'grande', mensaje:
+        `Premio de ${eur(importe)} >= umbral (${eur(umbral)}): requiere que decidas el reparto y la reinversión antes de registrarlo. Todavía no se ha anotado en el libro.`};
+    }
+    Finanzas.registrarMovimiento(ledger,'premio',importe,{date:opts.date, ticketId:opts.ticketId, note:`Premio categoría ${categoria}`});
+    if(tipo==='pequeno'){
+      Finanzas.registrarMovimiento(ledger,'reinversion',importe,{date:opts.date, ticketId:opts.ticketId, note:'Reinversión automática (premio por debajo del umbral)'});
+      return {procesado:true, tipoUmbral:'pequeno', reinvertido:Math.round(importe*100)/100, repartido:0};
+    }
+    const pctR = opts.pctReparto, pctI = opts.pctReinversion;
+    if(pctR==null||pctI==null) throw new Error('Debe especificarse pctReparto y pctReinversion.');
+    if(Math.round((pctR+pctI)*1e6)/1e6 !== 1) throw new Error('pctReparto + pctReinversion debe sumar 1.0');
+    const reinvertido = importe*pctI, repartido = importe*pctR;
+    if(reinvertido>0) Finanzas.registrarMovimiento(ledger,'reinversion',reinvertido,{date:opts.date, ticketId:opts.ticketId, note:`Reinversión decidida (${(pctI*100).toFixed(0)}%) de premio grande`});
+    return {procesado:true, tipoUmbral:'grande', reinvertido:Math.round(reinvertido*100)/100, repartido:Math.round(repartido*100)/100};
+  }
+};
+
+/* ============================================================
+   resultados.js — círculos Unicode, clasificación de premio e
+   informe para WhatsApp. Puerto literal de resultados.py.
+   ============================================================ */
+function circulo(n){
+  if(n===0) return '⓪';
+  if(n>=1 && n<=20) return String.fromCodePoint(0x2460 + (n-1));
+  if(n>=21 && n<=35) return String.fromCodePoint(0x3251 + (n-21));
+  if(n>=36 && n<=50) return String.fromCodePoint(0x32B1 + (n-36));
+  throw new Error('Sin círculo definido para '+n);
+}
+function compararApuesta(apNums, apReint, sorteoNums, sorteoReint){
+  const setSorteo = new Set(sorteoNums);
+  const aciertos = apNums.filter(n=>setSorteo.has(n)).sort((a,b)=>a-b);
+  return {aciertos, numAciertos:aciertos.length, aciertoReintegro: apReint===sorteoReint};
+}
+function clasificarPremio(numAciertos, aciertoReintegro){
+  if(numAciertos===6) return '6';
+  if(numAciertos===5 && aciertoReintegro) return '5R';
+  if(numAciertos===5) return '5';
+  if(numAciertos===4) return '4';
+  if(numAciertos===3) return '3';
+  if(aciertoReintegro) return 'R';
+  return null;
+}
+function formatearApuestaConCirculos(apNums, apReint, aciertos, aciertoReintegro){
+  const set = new Set(aciertos);
+  const partes = apNums.slice().sort((a,b)=>a-b).map(n=> set.has(n) ? circulo(n) : String(n));
+  const reintStr = aciertoReintegro ? `R:${circulo(apReint)}` : `R:${apReint}`;
+  return partes.join(' ') + '  ' + reintStr;
+}
+function generarInformeWhatsapp(boletos, sorteoNums, sorteoReint, tablaPremios, fechaSorteo){
+  const L=[];
+  L.push(AVISO_OBLIGATORIO); L.push('');
+  L.push('='.repeat(40));
+  L.push('RESULTADO PEÑA BABY BOOM - LA PRIMITIVA');
+  if(fechaSorteo) L.push('Sorteo: '+fechaSorteo);
+  L.push('Números: '+sorteoNums.slice().sort((a,b)=>a-b).join(' - ')+'   Reintegro: '+sorteoReint);
+  L.push('='.repeat(40)); L.push('');
+
+  let totalPremios=0; const huella=[]; let algunPremio=false;
+  for(const boleto of boletos){
+    L.push(`--- Boleto ${boleto.id} (reintegro fijo ${boleto.reintegro}) ---`);
+    boleto.apuestas.forEach((ap,idx)=>{
+      const comp = compararApuesta(ap, boleto.reintegro, sorteoNums, sorteoReint);
+      const texto = formatearApuestaConCirculos(ap, boleto.reintegro, comp.aciertos, comp.aciertoReintegro);
+      const categoria = clasificarPremio(comp.numAciertos, comp.aciertoReintegro);
+      let sufijo='';
+      if(categoria){
+        algunPremio=true;
+        if(tablaPremios && tablaPremios[categoria]!=null){
+          const importe = tablaPremios[categoria]; totalPremios+=importe;
+          sufijo = `  -> PREMIO categoría ${categoria}: ${eur(importe)}`;
+        } else sufijo = `  -> PREMIO categoría ${categoria} (importe no configurado)`;
+        huella.push(`Boleto ${boleto.id} / apuesta ${idx+1}: ${categoria}`);
+      }
+      L.push(`  Apuesta ${idx+1}: ${texto}${sufijo}`);
+    });
+    L.push('');
+  }
+  L.push('='.repeat(40));
+  if(algunPremio){
+    L.push(`PREMIOS TOTALES: ${huella.length} apuesta(s) premiada(s)`);
+    huella.forEach(h=>L.push('  - '+h));
+    if(tablaPremios) L.push('Importe total estimado: '+eur(totalPremios));
+  } else L.push('Sin premios en este sorteo.');
+  L.push('='.repeat(40));
+  return L.join('\n');
+}
+
+/* ============================================================
+   Estado — plantillas por defecto y validación.
+   Puerto de config.py / validar_configuracion (sin inventar
+   nunca un precio, tabla de premios o cuota de jugador).
+   ============================================================ */
+function filtrosPorDefecto(){
+  return {
+    parity:{active:true, minEven:1, maxEven:5},
+    consecutive:{active:true, maxRun:3},
+    decades:{active:true, maxPerDecade:3},
+    sum:{active:true, mean:150.0, stdev:32.79, kSigma:1.5},
+    highLow:{active:true, cutoff:24, minPerSide:1},
+    endings:{active:true, maxSameEnding:2}
+  };
+}
+function reglasVacias(){ return null; } // sin configuración todavía: no se asume nada
+function estadoPorDefecto(){
+  return {
+    v:1,
+    pena:{name:'Peña Baby Boom'},
+    rules:null, /* null hasta que el usuario configure explícitamente */
+    finance:{previousFund:0, movements:[]},
+    financeArchive:[], /* meses conciliados */
+    cyclic:{lastIndexUsed:0, lastRunDate:null},
+    currentDraw:null, /* boletos confirmados del sorteo en curso, pendientes de resultado */
+    history:[] /* sorteos ya comprobados */
+  };
+}
+function validarReglas(r){
+  const errores=[];
+  /* Los boletos son gratuitos: no hay precio por apuesta ni presupuesto que
+     limite cuántas se generan. La tabla de premios tampoco interviene en
+     la generación (ni en qué números salen, ni en el reparto por
+     boletos): solo se usa después, al comprobar un sorteo, para rellenar
+     el importe automáticamente. Por eso no bloquea el guardado de Reglas
+     si está vacía o incompleta — se puede completar más tarde, cuando la
+     administración publique los importes de ese sorteo. */
+  if(r.numTickets<10) errores.push('El número de boletos debe ser 10 como mínimo (cubren los reintegros 0-9).');
+  if(!(r.apuestasPorSorteo>=r.numTickets)) errores.push(`Las apuestas a generar por sorteo deben ser como mínimo ${r.numTickets} (una por boleto).`);
+  if(r.apuestasPorSorteo>r.numTickets*8) errores.push(`Las apuestas a generar por sorteo no pueden superar ${r.numTickets*8} (máximo 8 por boleto).`);
+  if(!Array.isArray(r.players) || r.players.length<1) errores.push('Debe haber al menos un jugador.');
+  else { r.players.forEach((p,i)=>{ if(!p.name || !p.name.trim()) errores.push(`El jugador ${i+1} necesita un nombre.`); }); }
+  if(!['ANALISIS','ALEATORIO','CICLICO'].includes(r.method)) errores.push('Método de generación no reconocido.');
+  const a=r.analysis||{};
+  if(!(a.poolSize>=6 && a.poolSize<=49)) errores.push('El tamaño del pool (método Análisis) debe estar entre 6 y 49.');
+  if(![3,4].includes(a.guarantee)) errores.push('La garantía de cobertura (método Análisis) debe ser 3 o 4.');
+  if(a.poolMode==='manual'){
+    if(!Array.isArray(a.poolManual) || a.poolManual.length!==a.poolSize) errores.push('El pool manual debe tener exactamente el tamaño indicado.');
+    else if(new Set(a.poolManual).size!==a.poolManual.length) errores.push('El pool manual tiene números repetidos.');
+    else if(a.poolManual.some(n=>n<1||n>49)) errores.push('El pool manual tiene números fuera de 1-49.');
+  }
+  return errores;
+}
+
+/* ============================================================
+   Persistencia compartida vía la capacidad `artifact`. Solo los
+   módulos operativos (rules, finance, cyclic, currentDraw,
+   history, pena) viven aquí. Investigación se calcula a partir
+   de history. Conocimiento vive aparte, solo en localStorage.
+   ============================================================ */
+let STATE = estadoPorDefecto();
+let artifactNS = null;
+let isReadOnly = false;
+let pendingDraw = null; /* previsualización de boletos, no persistida hasta confirmar */
+let origenEstado = 'nuevo';   /* de dónde salió lo que hay en pantalla */
+let localDisponible = true;   /* false si el navegador bloquea el almacenamiento */
+
+/* ------------------------------------------------------------
+   Copia en el propio dispositivo.
+
+   La versión anterior había suprimido esta copia porque, al abrir
+   un fichero descargado en un navegador donde ya se había probado
+   la aplicación, reaparecían los datos de la prueba antigua. El
+   problema no era guardar en el dispositivo, sino no saber cuál de
+   las dos copias era la buena. Ahora cada estado lleva su sello de
+   tiempo (`updatedAt`) y al arrancar gana simplemente el más
+   reciente, así que el fichero recién descargado se impone si trae
+   datos posteriores y la copia local se impone si contiene cambios
+   que todavía no se habían publicado.
+   ------------------------------------------------------------ */
+const LOCAL_STATE_KEY = 'bbsuite_estado_pena';
+
+function sellarEstado(){
+  STATE.updatedAt = new Date().toISOString();
+  STATE.rev = (Number(STATE.rev)||0) + 1;
+}
+function selloDe(estado){
+  const t = Date.parse((estado && estado.updatedAt) || '');
+  return isNaN(t) ? 0 : t;
+}
+function guardarEstadoLocal(){
+  try{
+    localStorage.setItem(LOCAL_STATE_KEY, JSON.stringify(STATE));
+    localDisponible = true;
+    return true;
+  }catch(e){
+    localDisponible = false;
+    return false;
+  }
+}
+function leerEstadoLocal(){
+  try{
+    const s = localStorage.getItem(LOCAL_STATE_KEY);
+    if(!s) return null;
+    const d = JSON.parse(s);
+    return (d && d.v) ? d : null;
+  }catch(e){ localDisponible = false; return null; }
+}
+function borrarEstadoLocal(){
+  try{ localStorage.removeItem(LOCAL_STATE_KEY); return true; }catch(e){ return false; }
+}
+function leerEstadoPublicado(){
+  try{
+    const raw = document.getElementById('bb-state-data').textContent;
+    const parsed = JSON.parse(raw);
+    return (parsed && parsed.v) ? parsed : null;
+  }catch(e){ return null; }
+}
+
+function cargarEstadoInicial(){
+  const publicado = leerEstadoPublicado();
+  const local = leerEstadoLocal();
+  if(!publicado && !local){ origenEstado='nuevo'; return; }
+  if(publicado && !local){ STATE = publicado; origenEstado='publicado'; return; }
+  if(local && !publicado){ STATE = local; origenEstado='local'; return; }
+  if(selloDe(local) > selloDe(publicado)){ STATE = local; origenEstado='local-mas-nuevo'; }
+  else { STATE = publicado; origenEstado='publicado'; }
+}
+
+function resetTransientUI(){
+  const bar = $('installBar'); if(bar) bar.style.display='none';
+  const err = $('errBanner'); if(err){ err.style.display='none'; err.textContent=''; }
+  const chip = $('savingChip'); if(chip) chip.style.display='none';
+}
+
+async function publishState(){
+  if(isReadOnly){ mostrarError('Estás en modo solo lectura: este cambio no se ha podido compartir con el resto de la peña.'); renderAll(); return {ok:false}; }
+  const chip = $('savingChip'); if(chip) chip.style.display='block';
+  resetTransientUI();
+
+  /* Primero el dispositivo, después la peña. Guardar en local es
+     inmediato y no puede fallar por la red, así que se hace siempre
+     antes de intentar publicar: si la publicación se cae, el trabajo
+     del usuario ya está a salvo en este navegador. */
+  sellarEstado();
+  const guardadoLocal = guardarEstadoLocal();
+  origenEstado = 'local';
+  const stateScript = document.getElementById('bb-state-data');
+  stateScript.textContent = safeJsonForScript(STATE);
+
+  if(!artifactNS){
+    if(chip) chip.style.display='none';
+    if(!guardadoLocal) mostrarError('Este navegador no permite guardar datos (modo privado o almacenamiento bloqueado). Los cambios se perderán al cerrar: exporta la copia de seguridad desde el panel Reglas.');
+    renderAll();
+    return {ok:false, reason: guardadoLocal ? 'solo_local' : 'sin_guardado'};
+  }
+  const html = '<!doctype html>\n' + document.documentElement.outerHTML;
+  try{
+    await artifactNS.publish(html);
+    /* Publicación correcta: la plataforma recarga esta vista a la
+       nueva versión, así que no hace falta hacer nada más aquí. */
+    return {ok:true};
+  }catch(err){
+    const code = err && err.code;
+    if(code==='conflict'){
+      /* Rutinario: alguien publicó antes. La vista se recargará sola
+         a la versión ganadora — no se reintenta. */
+      return {ok:false, reason:'conflict'};
+    }
+    if(code==='not_writer' || code==='not_granted' || code==='consent_required'){
+      isReadOnly = true;
+      renderAll();
+      return {ok:false, reason:'read_only'};
+    }
+    if(code==='upstream_error'){
+      await new Promise(r=>setTimeout(r, 700+Math.random()*500));
+      try{ await artifactNS.publish(html); return {ok:true}; }
+      catch(err2){ mostrarError('No se ha podido compartir el cambio (fallo temporal). Se ha guardado localmente; vuelve a intentarlo en un momento.'); }
+    } else {
+      mostrarError('No se ha podido compartir el cambio: ' + (err && err.message ? err.message : 'error desconocido') + '. Se ha guardado localmente en este dispositivo.');
+    }
+    if(chip) chip.style.display='none';
+    renderAll();
+    return {ok:false, reason:code||'error'};
+  }
+}
+function mostrarError(msg){ const el=$('errBanner'); el.textContent=msg; el.style.display='block'; }
+
+/* ============================================================
+   Descargas: dentro del visor de Artifact un enlace/blob de
+   descarga normal queda inerte, así que se ofrece primero por la
+   capacidad `downloads`; fuera del visor (pruebas locales, u otro
+   host) se cae al método clásico de enlace + blob.
+   ============================================================ */
+let downloadsNS = null;
+async function offerDownload(filename, text){
+  if(downloadsNS){
+    try{ await downloadsNS.save({filename, data:text}); return true; }
+    catch(err){
+      if(err && err.code==='declined') return false;
+      /* cualquier otra causa: se intenta el método clásico como último recurso */
+    }
+  }
+  try{
+    const blob = new Blob([text],{type:'text/plain;charset=utf-8'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+    return true;
+  }catch(e){ return false; }
+}
+
+/* ============================================================
+   Conocimiento (BBProject) — exclusivamente local, nunca se
+   publica en el estado compartido.
+   ============================================================ */
+const LOCAL_KEY = 'bbsuite_kb_local';
+function cargarLocal(){
+  try{ const s=localStorage.getItem(LOCAL_KEY); if(s){ const d=JSON.parse(s); if(Array.isArray(d)) return d; } }catch(e){}
+  return [];
+}
+function guardarLocal(kb){ try{ localStorage.setItem(LOCAL_KEY, JSON.stringify(kb)); }catch(e){} }
+let KB = cargarLocal();
+
+/* ============================================================
+   UI — un objeto por módulo con su render() y sus acciones.
+   ============================================================ */
+const UI = {
+
+  /* ---------- navegación ---------- */
+  switchTab(tab){
+    document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active', b.dataset.p===tab));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', p.id==='panel-'+tab));
+  },
+
+  /* ---------- dónde están guardados los datos ---------- */
+  renderEstadoGuardado(){
+    const banner = $('storeBanner'), detalle = $('storeState');
+    const sello = STATE.updatedAt ? new Date(STATE.updatedAt).toLocaleString('es-ES') : null;
+    const lineas = [];
+
+    if(!localDisponible){
+      banner.className = 'alerta';
+      banner.style.display = 'block';
+      banner.textContent = '⚠ Este navegador no está guardando nada (navegación privada o almacenamiento bloqueado): al cerrar la aplicación perderás los cambios. Exporta la copia de seguridad desde Reglas.';
+      lineas.push('En este dispositivo: NO SE PUEDE GUARDAR.');
+    } else {
+      banner.className = '';
+      banner.style.display = (origenEstado === 'local-mas-nuevo') ? 'block' : 'none';
+      if(origenEstado === 'local-mas-nuevo') banner.textContent = 'Se han recuperado los datos guardados en este dispositivo, más recientes que los de la versión compartida.';
+      lineas.push(sello
+        ? 'En este dispositivo: guardado · último cambio ' + sello
+        : 'En este dispositivo: sin cambios guardados todavía.');
+    }
+    lineas.push(artifactNS
+      ? 'Con el resto de la peña: se comparte al guardar cualquier cambio.'
+      : 'Con el resto de la peña: sin conexión desde aquí; los datos solo viven en este dispositivo hasta que lo abras desde el enlace compartido.');
+    if(STATE.rev) lineas.push('Versión nº ' + STATE.rev + ' de los datos de la peña.');
+    if(detalle) detalle.textContent = lineas.join('\n');
+  },
+  async exportarEstado(){
+    const nombre = 'bbsuite-pena-' + new Date().toISOString().slice(0,10) + '.json';
+    const ok = await offerDownload(nombre, JSON.stringify(STATE, null, 2));
+    if(!ok) mostrarError('No se ha podido guardar el fichero de copia de seguridad.');
+  },
+  importarEstado(input){
+    const f = input.files[0];
+    if(!f) return;
+    const rd = new FileReader();
+    rd.onload = async ()=>{
+      input.value = '';
+      let entrante;
+      try{ entrante = JSON.parse(rd.result); }catch(e){ alert('El fichero no es una copia de seguridad válida.'); return; }
+      if(!entrante || !entrante.v || !entrante.finance){ alert('El fichero no es una copia de seguridad de BBSuite.'); return; }
+      const fechaEntrante = entrante.updatedAt ? new Date(entrante.updatedAt).toLocaleString('es-ES') : 'sin fecha';
+      const fechaActual = STATE.updatedAt ? new Date(STATE.updatedAt).toLocaleString('es-ES') : 'sin fecha';
+      const aviso = 'Vas a sustituir TODOS los datos de este dispositivo.\n\n' +
+        'Copia del fichero: ' + fechaEntrante + '\n' +
+        'Datos actuales:    ' + fechaActual + '\n\n' +
+        (selloDe(entrante) < selloDe(STATE) ? '⚠ La copia del fichero es MÁS ANTIGUA que lo que tienes ahora.\n\n' : '') +
+        '¿Continuar?';
+      if(!confirm(aviso)) return;
+      STATE = entrante;
+      await publishState();
+      alert('Copia restaurada.');
+    };
+    rd.readAsText(f);
+  },
+  olvidarLocal(){
+    if(!confirm('¿Borrar la copia guardada en este dispositivo?\n\nNo afecta a lo que ya se haya compartido con la peña, pero todo lo que no esté compartido se perderá. Exporta antes la copia de seguridad si tienes dudas.')) return;
+    borrarEstadoLocal();
+    location.reload();
+  },
+
+  /* ================= REGLAS ================= */
+  addPlayerRow(name){
+    const c=$('playerRows');
+    const row=document.createElement('div'); row.className='playerrow';
+    row.innerHTML = `<input type="text" class="pname" placeholder="Nombre" value="${name?String(name).replace(/"/g,'&quot;'):''}">`+
+      `<span class="amt-fixed">${eur(APORTACION_FIJA_JUGADOR)}</span>`+
+      `<button type="button" class="xbtn" onclick="this.parentElement.remove();UI.updatePlayersSum();">✕</button>`;
+    c.appendChild(row);
+    row.querySelector('.pname').addEventListener('input', UI.updatePlayersSum);
+    UI.updatePlayersSum();
+  },
+  updatePlayersSum(){
+    const n = document.querySelectorAll('#playerRows .playerrow').length;
+    const total = n*APORTACION_FIJA_JUGADOR;
+    $('playersSum').textContent = `${n} jugador${n===1?'':'es'} × ${eur(APORTACION_FIJA_JUGADOR)} = aportación mensual total ${eur(total)}`;
+  },
+  renderMethodParams(){
+    const method = $('r_method').value;
+    const a = (STATE.rules && STATE.rules.analysis) || {poolSize:25,guarantee:4,poolMode:'random',poolManual:[],enumThreshold:50000,sampleCandidates:300,poolSeed:null};
+    const f = (STATE.rules && STATE.rules.filters) || filtrosPorDefecto();
+    const c = $('methodParams');
+    if(method==='ANALISIS'){
+      c.innerHTML = `
+        <div class="row">
+          <div><label>Tamaño del pool (6-49)</label><input type="number" min="6" max="49" id="a_poolsize" value="${a.poolSize}"></div>
+          <div><label>Garantía de cobertura</label><select id="a_guarantee"><option value="3">3 aciertos</option><option value="4">4 aciertos</option></select></div>
+        </div>
+        <label>Origen del pool</label>
+        <select id="a_poolmode"><option value="random">Muestreo aleatorio (con semilla registrada)</option><option value="manual">Pool manual</option></select>
+        <div id="a_poolmanual_wrap" style="display:none;"><label>Pool manual (números separados por espacios)</label><input type="text" id="a_poolmanual" value="${(a.poolManual||[]).join(' ')}"></div>
+        <h3>Filtros estadísticos de varianza</h3>
+        <div class="hint">Reducen la dispersión de las combinaciones generadas; nunca alteran la probabilidad de premio mayor (ver el aviso obligatorio).</div>
+        ${UI.filterRow('parity','Paridad (nº de pares)', f.parity, [['minEven','mín. pares'],['maxEven','máx. pares']])}
+        ${UI.filterRow('consecutive','Consecutivos máximos', f.consecutive, [['maxRun','máx. racha']])}
+        ${UI.filterRow('decades','Máximo por decena', f.decades, [['maxPerDecade','máx. por decena']])}
+        ${UI.filterRow('sum','Suma (media ± k·desviación)', f.sum, [['mean','media'],['stdev','desviación'],['kSigma','k (sigma)']])}
+        ${UI.filterRow('highLow','Alto/bajo', f.highLow, [['cutoff','punto de corte'],['minPerSide','mín. por lado']])}
+        ${UI.filterRow('endings','Terminaciones repetidas', f.endings, [['maxSameEnding','máx. misma terminación']])}
+      `;
+      $('a_guarantee').value = String(a.guarantee||4);
+      $('a_poolmode').value = a.poolMode||'random';
+      $('a_poolmode').addEventListener('change', e=>{ $('a_poolmanual_wrap').style.display = e.target.value==='manual' ? 'block':'none'; });
+      $('a_poolmanual_wrap').style.display = (a.poolMode==='manual') ? 'block':'none';
+    } else if(method==='CICLICO'){
+      c.innerHTML = `<div class="hint">Recorre los 49 números en el orden de frecuencia real del histórico de La Primitiva (3.823 sorteos, 1985-2024: el más salido primero, el menos salido el último) y, al agotar el ciclo, vuelve a empezar por el mismo orden indefinidamente. El cursor actual está en la posición <b>${STATE.cyclic.lastIndexUsed}</b> (próximo número: <b>${valorCiclico(STATE.cyclic.lastIndexUsed+1)}</b>). Los reintegros 0-9 se reparten igual: el más frecuente va al boleto con más líneas de apuesta, y así sucesivamente, usando siempre los 10 dígitos.</div>`;
+    } else {
+      c.innerHTML = `<div class="hint">6 números al azar por apuesta, sin ningún filtro. Se ofrece como alternativa de control, sin pretensión estadística.</div>`;
+    }
+  },
+  filterRow(key,label,cfg,params){
+    const active = cfg && cfg.active;
+    let inputs = params.map(([k,lbl])=>`<div><label>${lbl}</label><input type="number" step="0.01" class="filt-${key}-${k}" value="${cfg?cfg[k]:''}"></div>`).join('');
+    return `<div class="row" style="align-items:flex-end;margin-top:8px;">
+        <div style="flex:0 0 26px;"><label>&nbsp;</label><input type="checkbox" class="filt-${key}-active" ${active?'checked':''} style="width:20px;height:20px;padding:0;"></div>
+        <div style="flex:2;"><label>${label}</label><div class="row">${inputs}</div></div>
+      </div>`;
+  },
+  gatherFilterCfg(key,params){
+    const active = $('.filt-'+key+'-active') ? undefined : undefined; // placeholder unused
+    const activeEl = document.querySelector(`.filt-${key}-active`);
+    const cfg = {active: activeEl ? activeEl.checked : false};
+    params.forEach(([k])=>{ const el=document.querySelector(`.filt-${key}-${k}`); cfg[k]=el?parseFloat(el.value):null; });
+    return cfg;
+  },
+  renderReglas(){
+    const r = STATE.rules;
+    $('reglas-empty').style.display = r ? 'none' : 'block';
+    $('playerRows').innerHTML='';
+    ((r&&r.players)||[]).forEach(p=>UI.addPlayerRow(p.name));
+    if(!r || !r.players || !r.players.length){ for(let i=0;i<7;i++) UI.addPlayerRow(''); }
+    $('r_numtickets').value = r ? r.numTickets : 10;
+    $('r_numapuestas').value = r ? r.apuestasPorSorteo : 10;
+    $('r_method').value = r ? r.method : 'ANALISIS';
+    UI.renderMethodParams();
+    $('r_smallthr').value = r ? r.smallPrizeThreshold : 5.0;
+    $('r_errors').innerHTML='';
+    UI.updatePlayersSum();
+  },
+  async saveReglas(){
+    const players = Array.from(document.querySelectorAll('#playerRows .playerrow')).map(row=>({
+      name: row.querySelector('.pname').value.trim(),
+      contrib: APORTACION_FIJA_JUGADOR
+    })).filter(p=>p.name);
+    /* La tabla de premios ya no se configura en Reglas: el importe de cada
+       premio se introduce al comprobar el sorteo (panel Sorteo), que es
+       donde de verdad hace falta. rules.prizeTable se conserva vacío por
+       compatibilidad con el resto del código (informe y registro de
+       premios), que ya sabe pedir el importe a mano si no lo encuentra. */
+    const prizeTable = (STATE.rules && STATE.rules.prizeTable) || {};
+    const method = $('r_method').value;
+    let analysis = (STATE.rules&&STATE.rules.analysis) || {poolSize:25,guarantee:4,poolMode:'random',poolManual:[],enumThreshold:50000,sampleCandidates:300,poolSeed:null};
+    let filters = (STATE.rules&&STATE.rules.filters) || filtrosPorDefecto();
+    if(method==='ANALISIS'){
+      analysis = {
+        poolSize: parseInt($('a_poolsize').value)||25, guarantee: parseInt($('a_guarantee').value)||4,
+        poolMode: $('a_poolmode').value, poolManual: parseNumList($('a_poolmanual').value),
+        enumThreshold:50000, sampleCandidates:300, poolSeed:null
+      };
+      filters = {
+        parity: UI.gatherFilterCfg('parity',[['minEven'],['maxEven']]),
+        consecutive: UI.gatherFilterCfg('consecutive',[['maxRun']]),
+        decades: UI.gatherFilterCfg('decades',[['maxPerDecade']]),
+        sum: UI.gatherFilterCfg('sum',[['mean'],['stdev'],['kSigma']]),
+        highLow: UI.gatherFilterCfg('highLow',[['cutoff'],['minPerSide']]),
+        endings: UI.gatherFilterCfg('endings',[['maxSameEnding']])
+      };
+    }
+    const rules = {
+      prizeTable,
+      numTickets: parseInt($('r_numtickets').value)||10,
+      apuestasPorSorteo: parseInt($('r_numapuestas').value)||parseInt($('r_numtickets').value)||10,
+      players, minMonthly: players.length*APORTACION_FIJA_JUGADOR,
+      method, analysis, filters,
+      smallPrizeThreshold: parseFloat($('r_smallthr').value)||5,
+      bigPrizePolicy: (STATE.rules&&STATE.rules.bigPrizePolicy) || {splitPct:0.5, reinvestPct:0.5}
+    };
+    const errores = validarReglas(rules);
+    if(errores.length){ $('r_errors').innerHTML = '<div class="errlist"><b>No se puede guardar:</b><br>'+errores.join('<br>')+'</div>'; return; }
+    $('r_errors').innerHTML='';
+    STATE.rules = rules;
+    await publishState();
+  },
+
+  /* ================= FINANZAS ================= */
+  renderFinanzas(){
+    const l = STATE.finance;
+    const saldo = Finanzas.saldoActual(l);
+    const entradas = l.movements.filter(m=>m.type==='aportacion' || m.type==='reinversion').reduce((s,m)=>s+m.amount,0);
+    const salidas = l.movements.filter(m=>m.type==='gasto').reduce((s,m)=>s+m.amount,0);
+    $('fundTotals').innerHTML = `<span>Fondo acum. previo: <b>${eur(l.previousFund)}</b></span><span>Entradas: <b>${eur(entradas)}</b></span><span>Gastos: <b>${eur(salidas)}</b></span><span>Saldo actual: <b>${eur(saldo)}</b></span>`;
+    const tbl = $('ledger');
+    if(!l.movements.length){ tbl.innerHTML='<div class="empty">Sin movimientos todavía.</div>'; return; }
+    const filas = l.movements.map((m,i)=>({m,i})).reverse();
+    tbl.innerHTML = '<table><tr><th>Fecha</th><th>Tipo</th><th class="l">Nota</th><th>€</th><th>Saldo</th><th></th></tr>' +
+      filas.map(({m,i})=>`<tr><td>${m.date}</td><td>${m.type}</td><td class="l">${m.player?m.player+' · ':''}${m.note||''}</td>`+
+        `<td style="color:${(m.type==='gasto')?'var(--pen)':'var(--ok)'};font-weight:700;">${m.type==='gasto'?'-':'+'}${m.amount.toFixed(2)}</td><td>${m.balance.toFixed(2)}</td>`+
+        `<td><button type="button" class="xbtn" title="Eliminar movimiento" onclick="UI.eliminarMovimiento(${i})">✕</button></td></tr>`).join('') + '</table>';
+  },
+  async eliminarMovimiento(index){
+    const l = STATE.finance;
+    const m = l.movements[index];
+    if(!m) return;
+    let aviso = `¿Eliminar este movimiento?\n\n${m.date} · ${m.type} · ${m.type==='gasto'?'-':'+'}${eur(m.amount)}${m.note?'\n'+m.note:''}\n\nEl saldo se recalculará desde aquí. Úsalo para corregir errores como una aportación registrada dos veces.`;
+    if(m.type==='premio' || m.type==='reinversion'){ aviso += '\n\n⚠ Este movimiento viene de un premio registrado en Sorteo. Borrarlo aquí corrige el fondo, pero no cambia el premio ya anotado en el historial de sorteos.'; }
+    if(!confirm(aviso)) return;
+    Finanzas.eliminarMovimiento(l, index);
+    await publishState();
+  },
+  async addMovimiento(){
+    if(!STATE.rules){ mostrarError('Configura primero las Reglas de la peña.'); return; }
+    const tipo = $('f_type').value, importe = parseFloat($('f_amount').value);
+    if(!(importe>0)){ mostrarError('Introduce un importe positivo.'); return; }
+    Finanzas.registrarMovimiento(STATE.finance, tipo, importe, {player:$('f_player').value.trim()||null, note:$('f_note').value.trim()||null});
+    $('f_amount').value=''; $('f_player').value=''; $('f_note').value='';
+    await publishState();
+  },
+  async conciliar(){
+    if(!confirm('¿Conciliar el mes? El saldo actual pasará a ser el fondo acumulado del próximo mes y el libro se archivará.')) return;
+    const saldo = Finanzas.saldoActual(STATE.finance);
+    STATE.financeArchive.push({closedAt:new Date().toISOString(), movements:STATE.finance.movements, closingBalance:saldo});
+    STATE.finance = {previousFund: saldo, movements: []};
+    await publishState();
+  },
+
+  /* ================= GENERACIÓN ================= */
+  renderGeneracion(){
+    const r = STATE.rules;
+    $('gen-method-tag').textContent = r ? r.method : '';
+    if(!r){ $('g_presupuesto').textContent='Configura primero las Reglas de la peña.'; $('previewCard').style.display='none'; }
+    else {
+      const saldo = Finanzas.saldoActual(STATE.finance);
+      $('g_presupuesto').textContent = `Fondo acumulado: ${eur(saldo)} (los boletos son gratuitos: no se descuenta nada de aquí) · ${r.apuestasPorSorteo} apuestas configuradas para este sorteo en ${r.numTickets} boletos.`;
+    }
+    UI.renderCurrentDraw();
+  },
+  previsualizarBoletos(){
+    const r = STATE.rules;
+    if(!r){ mostrarError('Configura primero las Reglas de la peña.'); return; }
+    document.querySelector('#previewCard .btn-gold').style.display='block';
+    const meta = generarBoletos(r, r.apuestasPorSorteo, STATE.cyclic);
+    pendingDraw = {fecha: $('g_date').value.trim()||null, meta};
+    $('previewCard').style.display='block';
+    $('preview-tag').textContent = meta.metodo;
+    let infoHtml = `${meta.numApuestasTotal} apuestas en ${r.numTickets} boletos · boletos gratuitos, sin coste para el fondo`;
+    if(meta.metodo==='ANALISIS'){
+      infoHtml += `<br>Pool de ${meta.pool.length} números (semilla ${meta.semillaPool!=null?meta.semillaPool:'pool manual'}) · cota de Schönheim: ${meta.mMinTeorico} apuestas para cobertura teórica completa · cobertura alcanzada: ${(meta.coveragePct*100).toFixed(1)}% (${meta.subconjuntosCubiertos}/${meta.subconjuntosObjetivo})`;
+    }
+    if(meta.numApuestasTotal < r.apuestasPorSorteo){
+      infoHtml += `<br>⚠ Se pedían ${r.apuestasPorSorteo} apuestas, pero el pool elegido solo tiene combinaciones únicas de 6 números para ${meta.numApuestasTotal}. Amplía el tamaño del pool si quieres llegar a las ${r.apuestasPorSorteo} apuestas.`;
+    }
+    if(r.numTickets>10) infoHtml += '<br>⚠ Con más de 10 boletos, algún reintegro se repetirá entre boletos.';
+    $('previewInfo').innerHTML = infoHtml;
+    $('previewTickets').innerHTML = UI.renderTicketsHtml(meta.boletos);
+  },
+  renderTicketsHtml(boletos){
+    return boletos.map(b=>`<div class="boleto"><div class="boleto-head"><span>Boleto ${b.id}</span><span class="rtag win">R:${b.reintegro}</span></div>`+
+      b.apuestas.map((ap,i)=>`<div class="combo"><span class="idx">${i+1}</span>${ap.map(n=>`<span class="num">${pad(n)}</span>`).join('')}</div>`).join('') + '</div>').join('');
+  },
+  async confirmarBoletos(){
+    if(!pendingDraw){ return; }
+    const r = STATE.rules;
+    /* Los boletos son gratuitos: confirmarlos no registra ningún gasto en
+       Finanzas. El fondo solo se mueve con aportaciones y premios. */
+    if(r.method==='CICLICO') STATE.cyclic = pendingDraw.meta.cyclicStateFinal;
+    STATE.currentDraw = {fecha: pendingDraw.fecha, method: pendingDraw.meta.metodo, boletos: pendingDraw.meta.boletos, meta: pendingDraw.meta};
+    pendingDraw = null;
+    $('previewCard').style.display='none';
+    await publishState();
+  },
+  renderCurrentDraw(){
+    const d = STATE.currentDraw;
+    $('currentCard').style.display = d ? 'block' : 'none';
+    if(!d) return;
+    $('current-tag').textContent = (d.fecha?d.fecha+' · ':'') + d.method;
+    $('currentTickets').innerHTML = UI.renderTicketsHtml(d.boletos);
+  },
+
+  /* ================= SORTEO ================= */
+  renderSorteo(){
+    const has = !!STATE.currentDraw;
+    $('sorteo-empty').style.display = has ? 'none':'block';
+    $('sorteo-form').style.display = has ? 'block':'none';
+    UI.renderPendingPrizes();
+  },
+  async comprobarResultado(){
+    const d = STATE.currentDraw;
+    if(!d) return;
+    const nums = parseNumList($('s_nums').value);
+    const reint = parseInt($('s_reint').value);
+    if(nums.length!==6 || new Set(nums).size!==6 || nums.some(n=>n<1||n>49)){ mostrarError('Introduce los 6 números ganadores (1-49, sin repetir).'); return; }
+    if(!(reint>=0 && reint<=9)){ mostrarError('El reintegro debe estar entre 0 y 9.'); return; }
+    const reportText = generarInformeWhatsapp(d.boletos, nums, reint, STATE.rules.prizeTable, d.fecha);
+    const prizes=[];
+    d.boletos.forEach(b=>b.apuestas.forEach((ap,idx)=>{
+      const comp = compararApuesta(ap, b.reintegro, nums, reint);
+      const categoria = clasificarPremio(comp.numAciertos, comp.aciertoReintegro);
+      if(categoria){
+        const importe = STATE.rules.prizeTable[categoria];
+        prizes.push({ticketId:b.id, apuestaIdx:idx+1, categoria, importe: importe!=null?importe:null, status:'pendiente'});
+      }
+    }));
+    STATE.history.push({fecha:d.fecha, numeros:nums, reintegro:reint, ticketsSnapshot:d.boletos, method:d.method, reportText, prizes, ts:Date.now()});
+    STATE.currentDraw = null;
+    $('s_nums').value=''; $('s_reint').value='';
+    await publishState();
+  },
+  renderPendingPrizes(){
+    const c = $('sorteoResults');
+    const last = STATE.history[STATE.history.length-1];
+    if(!last){ c.innerHTML=''; return; }
+    const pendientes = last.prizes.filter(p=>p.status==='pendiente');
+    if(!pendientes.length){ c.innerHTML = `<div class="card"><h2>Último sorteo comprobado</h2><div class="hint">${last.fecha||''} · sin premios pendientes de registrar.</div></div>`; return; }
+    c.innerHTML = `<div class="card"><h2>Premios por registrar <small>${last.fecha||''}</small></h2>` +
+      pendientes.map((p,i)=>{
+        const idx = last.prizes.indexOf(p);
+        const importe = p.importe!=null ? p.importe : 0;
+        const esGrande = importe >= (STATE.rules.smallPrizeThreshold||5);
+        /* Los campos de reparto se generan siempre (ocultos si el importe
+           todavía no llega al umbral) porque el importe se escribe aquí
+           mismo, en vivo: no se conoce de antemano si el premio será
+           "grande" hasta que el usuario lo introduzca. UI.onPrizeAmountInput
+           los muestra u oculta al teclear, sin tener que volver a publicar
+           ni recargar la vista. */
+        return `<div class="boleto">
+          <div class="boleto-head"><span>Boleto ${p.ticketId} · apuesta ${p.apuestaIdx}</span><span class="rtag win">Cat. ${p.categoria}</span></div>
+          <label>Importe del premio (€)</label><input type="number" step="0.01" class="prize-amt" id="pz_amt_${idx}" value="${p.importe!=null?p.importe:''}" oninput="UI.onPrizeAmountInput(${idx})">
+          <div id="pz_split_wrap_${idx}" style="display:${esGrande?'block':'none'};">
+            <div class="hint">Premio igual o superior al umbral (${eur(STATE.rules.smallPrizeThreshold||5)}): decide cómo se reparte antes de registrarlo.</div>
+            <div class="row"><div><label>% reparto entre jugadores</label><input type="number" step="0.05" id="pz_split_${idx}" value="0.5"></div>
+            <div><label>% reinversión al fondo</label><input type="number" step="0.05" id="pz_reinv_${idx}" value="0.5"></div></div>
+          </div>
+          <button class="btn btn-gold btn-sm" onclick="UI.registrarPremio(${idx})">✔ Registrar premio</button>
+        </div>`;
+      }).join('') + '</div>';
+  },
+  onPrizeAmountInput(idx){
+    const importe = parseFloat($('pz_amt_'+idx).value) || 0;
+    const esGrande = importe >= (STATE.rules.smallPrizeThreshold||5);
+    const wrap = $('pz_split_wrap_'+idx);
+    if(wrap) wrap.style.display = esGrande ? 'block' : 'none';
+  },
+  async registrarPremio(idx){
+    const last = STATE.history[STATE.history.length-1];
+    const p = last.prizes[idx];
+    const importe = parseFloat($('pz_amt_'+idx).value);
+    if(!(importe>0)){ mostrarError('Introduce el importe del premio.'); return; }
+    const esGrande = importe >= (STATE.rules.smallPrizeThreshold||5);
+    let opts = {ticketId:p.ticketId};
+    if(esGrande){
+      const splitEl = $('pz_split_'+idx), reinvEl = $('pz_reinv_'+idx);
+      const split = splitEl ? parseFloat(splitEl.value) : NaN, reinv = reinvEl ? parseFloat(reinvEl.value) : NaN;
+      if(isNaN(split) || isNaN(reinv) || Math.round((split+reinv)*100)!==100){ mostrarError('% reparto + % reinversión debe sumar 1.0 (100%).'); return; }
+      opts.confirmarGrande = true; opts.pctReparto = split; opts.pctReinversion = reinv;
+    }
+    const res = Finanzas.procesarPremio(STATE.finance, importe, STATE.rules.smallPrizeThreshold, p.categoria, opts);
+    if(!res.procesado){ mostrarError(res.mensaje); return; }
+    p.importe = importe; p.status='registrado'; p.tipoUmbral=res.tipoUmbral; p.reinvertido=res.reinvertido; p.repartido=res.repartido;
+    /* El informe de WhatsApp se generó al comprobar el sorteo con la tabla
+       de premios que hubiera en ese momento (rules.prizeTable, que ya no
+       se rellena en Reglas y por tanto suele estar vacía): el importe real
+       se decide aquí, en Sorteo, después. Sin regenerar el texto, el parte
+       compartido con la peña se quedaría para siempre diciendo "importe no
+       configurado" aunque el premio ya se haya registrado con su importe
+       exacto — no sería coherente con los aciertos/premios registrados. */
+    const tablaActual = {};
+    last.prizes.forEach(pr => { if(pr.importe!=null) tablaActual[pr.categoria] = pr.importe; });
+    last.reportText = generarInformeWhatsapp(last.ticketsSnapshot, last.numeros, last.reintegro, tablaActual, last.fecha);
+    await publishState();
+  },
+
+  /* ================= RESUMEN ================= */
+  buildFondoTexto(){
+    const P = STATE.pena, saldo = Finanzas.saldoActual(STATE.finance);
+    const L=[`💼 *${(P.name||'Peña Baby Boom').toUpperCase()}* · Estado del fondo`, new Date().toLocaleDateString('es-ES'), '',
+      `Fondo acumulado previo: ${eur(STATE.finance.previousFund)}`, `*Saldo actual: ${eur(saldo)}*`, ''];
+    L.push('🧾 *Últimos movimientos*');
+    STATE.finance.movements.slice(-8).reverse().forEach(m=>L.push(`${m.date} · ${m.type}${m.note?' · '+m.note:''} · ${m.type==='gasto'?'-':'+'}${eur(m.amount)}`));
+    L.push(''); L.push('_Parte generado con BBSuite_');
+    return L.join('\n');
+  },
+  buildCarteraTexto(){
+    const d = STATE.currentDraw;
+    if(!d) return 'No hay boletos confirmados de ningún sorteo en curso.';
+    const P = STATE.pena;
+    const apuestas = d.boletos.reduce((s,b)=>s+b.apuestas.length,0);
+    const L=[`🎟️ *${(P.name||'Peña Baby Boom').toUpperCase()}* · Boletos en juego`, `Sorteo: ${d.fecha||'(sin fecha)'} · método ${d.method}`,
+      `${apuestas} apuestas en ${d.boletos.length} boletos · gratis`, ''];
+    d.boletos.forEach(b=>{ L.push(`*Boleto ${b.id}* — reintegro ${b.reintegro}`); b.apuestas.forEach((a,i)=>L.push(`${i+1}) ${a.map(pad).join(' ')}`)); L.push(''); });
+    L.push('_Parte generado con BBSuite_');
+    return L.join('\n');
+  },
+  previewInforme(force){
+    const kind = $('rp_kind').value;
+    let text;
+    if(kind==='fondo') text = UI.buildFondoTexto();
+    else if(kind==='cartera') text = UI.buildCarteraTexto();
+    else { const last = STATE.history[STATE.history.length-1]; text = last ? last.reportText : 'Todavía no se ha comprobado ningún sorteo.'; }
+    $('rp_text').value = text;
+    $('rp_status').textContent = force ? 'Resumen regenerado.' : '';
+  },
+  shareWhatsapp(){
+    if(!$('rp_text').value) UI.previewInforme();
+    window.open('https://wa.me/?text='+encodeURIComponent($('rp_text').value), '_blank');
+  },
+  async copyInforme(){
+    try{ await navigator.clipboard.writeText($('rp_text').value); $('rp_status').textContent='Copiado ✔'; }
+    catch(e){ $('rp_text').select(); document.execCommand('copy'); $('rp_status').textContent='Copiado ✔'; }
+  },
+  async downloadInforme(){
+    const ok = await offerDownload('baby-boom-parte-'+new Date().toISOString().slice(0,10)+'.txt', $('rp_text').value);
+    $('rp_status').textContent = ok ? 'Fichero guardado en tu dispositivo.' : 'No se ha guardado el fichero.';
+  },
+
+  /* ================= INVESTIGACIÓN ================= */
+  renderInvestigacion(){
+    const c = $('metrics');
+    if(!STATE.history.length){ c.innerHTML = '<div class="empty">Sin sorteos comprobados todavía.</div>'; return; }
+    let premiado=0, rows='';
+    STATE.history.slice().reverse().forEach(h=>{
+      const apuestas = h.ticketsSnapshot.reduce((s,b)=>s+b.apuestas.length,0);
+      const premiadoSorteo = h.prizes.reduce((s,p)=>s+(p.importe||0),0);
+      premiado+=premiadoSorteo;
+      rows += `<tr><td class="l">${h.fecha||'—'}</td><td>${apuestas}</td><td>${h.prizes.length}</td>`+
+        `<td style="font-weight:700;color:var(--ok);">${eur(premiadoSorteo)}</td></tr>`;
+    });
+    c.innerHTML = `<div class="totals"><span>Sorteos: <b>${STATE.history.length}</b></span><span>Total ganado en premios: <b>${eur(premiado)}</b></span></div>`+
+      `<div class="tablewrap"><table><tr><th class="l">Sorteo</th><th>Apuestas</th><th>Premios</th><th>Ganado</th></tr>${rows}</table></div>`+
+      `<div class="hint">Los boletos son gratuitos: no hay coste que restar, así que lo ganado en premios es beneficio neto sobre el dinero (aparte del tiempo dedicado a rellenarlos). ${AVISO_OBLIGATORIO}</div>`;
+  },
+
+  /* ================= CONOCIMIENTO (local) ================= */
+  addKb(){
+    const t = $('j_text').value.trim(); if(!t) return;
+    KB.push({ts:Date.now(), type:$('j_type').value, text:t});
+    guardarLocal(KB); $('j_text').value=''; UI.renderKb();
+  },
+  renderKb(){
+    $('kb').innerHTML = KB.slice().reverse().map(k=>`<div class="kb-item"><div class="kb-meta">${k.type} · ${new Date(k.ts).toLocaleDateString('es-ES')}</div>${k.text.replace(/</g,'&lt;')}</div>`).join('') || '<div class="empty">Sin anotaciones.</div>';
+  },
+  async exportKb(){
+    await offerDownload('bbsuite-conocimiento-'+new Date().toISOString().slice(0,10)+'.json', JSON.stringify(KB,null,2));
+  },
+  importKb(input){
+    const f = input.files[0]; if(!f) return;
+    const rd = new FileReader();
+    rd.onload = ()=>{ try{ const d=JSON.parse(rd.result); if(Array.isArray(d)){ KB=d; guardarLocal(KB); UI.renderKb(); alert('Notas restauradas: '+d.length); } else alert('Fichero no válido.'); }catch(e){ alert('Fichero no válido.'); } };
+    rd.readAsText(f);
+  }
+};
+
+function renderAll(){
+  $('roBanner').style.display = isReadOnly ? 'block' : 'none';
+  UI.renderReglas(); UI.renderFinanzas(); UI.renderGeneracion(); UI.renderSorteo(); UI.previewInforme(); UI.renderInvestigacion(); UI.renderKb();
+  UI.renderEstadoGuardado();
+}
+
+/* ============================================================
+   Arranque: navegación, PWA, capacidad `artifact`, primer render.
+   ============================================================ */
+document.querySelectorAll('#nav button').forEach(b=>b.addEventListener('click',()=>UI.switchTab(b.dataset.p)));
+
+const iconSvg = encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='192' height='192'><rect width='192' height='192' rx='36' fill='#082A1E'/><circle cx='96' cy='86' r='46' fill='#C79A44' stroke='#0B4A34' stroke-width='6'/><text x='96' y='100' font-size='36' font-family='monospace' font-weight='bold' text-anchor='middle' fill='#082A1E'>BB</text><text x='96' y='160' font-size='22' font-family='monospace' font-weight='bold' text-anchor='middle' fill='#FBF6EA'>SUITE</text></svg>`);
+const manifestObj = {name:'BBSuite - Peña Baby Boom', short_name:'BBSuite', start_url:'.', display:'standalone', background_color:'#082A1E', theme_color:'#082A1E', icons:[{src:'data:image/svg+xml,'+iconSvg, sizes:'192x192', type:'image/svg+xml'}]};
+document.getElementById('manifestLink').href = 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(manifestObj));
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredPrompt=e; $('installBar').style.display='flex'; });
+$('installBtn').addEventListener('click', ()=>{ if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt=null; } $('installBar').style.display='none'; });
+
+/* Sondeo real del almacenamiento: que no haya copia guardada no
+   significa que el navegador deje guardar. Se comprueba escribiendo
+   y borrando una clave de prueba antes de decirle nada al usuario. */
+function comprobarAlmacenamiento(){
+  try{
+    localStorage.setItem('bbsuite_prueba','1');
+    localStorage.removeItem('bbsuite_prueba');
+    localDisponible = true;
+  }catch(e){ localDisponible = false; }
+}
+
+comprobarAlmacenamiento();
+cargarEstadoInicial();
+renderAll();
+if(window.claude && window.claude.use){
+  window.claude.use('artifact').then(ns=>{ artifactNS = ns; UI.renderEstadoGuardado(); }).catch(()=>{ artifactNS=null; UI.renderEstadoGuardado(); });
+  window.claude.use('downloads').then(ns=>{ downloadsNS = ns; }).catch(()=>{ downloadsNS=null; });
+}
+</script>
