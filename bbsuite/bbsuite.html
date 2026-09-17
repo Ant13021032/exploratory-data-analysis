@@ -91,7 +91,7 @@
   tr.win td{background:#f3e6c9;}
   .tablewrap{overflow-x:auto;}
 
-  .totals{margin-top:9px;padding:11px 12px;background:var(--felt-deep);color:var(--paper);border-radius:6px;font-size:11.5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:5px 10px;}
+  .totals{margin-top:9px;padding:11px 12px;background:var(--felt-deep);color:var(--paper);border-radius:6px;font-size:11.5px;display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:6px 12px;}
   .totals b{color:var(--gold);}
 
   .kb-item{background:var(--paper-2);border-left:3px solid var(--gold);padding:8px 10px;margin-top:7px;border-radius:0 6px 6px 0;font-size:11.5px;}
@@ -105,6 +105,60 @@
   .playerrow input{flex:1;}
   .playerrow .amt-fixed{flex:0 0 78px;text-align:right;font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--felt-deep);}
   .xbtn{flex:0 0 auto;background:transparent;border:1px solid var(--pen);color:var(--pen);border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:13px;line-height:1;}
+  /* ---- Ficha de plan / presupuesto (Reglas y Generación) ---- */
+  .plan{margin-top:11px;padding:12px;background:var(--felt-deep);border:1px solid var(--felt-line);border-radius:8px;color:var(--paper);}
+  .plan-title{font-family:var(--font-display);font-weight:600;font-size:13.5px;color:var(--gold);margin-bottom:8px;}
+  .plan-src{display:flex;flex-wrap:wrap;align-items:baseline;gap:3px 8px;font-size:11.5px;color:#9db5a5;border-bottom:1px dashed var(--felt-line);padding-bottom:9px;margin-bottom:10px;}
+  .plan-src b{color:var(--paper);font-weight:600;}
+  .plan-src .eq{color:var(--gold);font-weight:700;}
+  .plan-src .tot{color:var(--gold);font-weight:700;font-size:13.5px;font-family:var(--font-display);}
+  .plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;}
+  .plan-fig{background:rgba(251,246,234,0.06);border:1px solid var(--felt-line);border-radius:6px;padding:8px 10px;min-width:0;}
+  .plan-fig .k{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#9db5a5;margin-bottom:3px;}
+  .plan-fig .v{display:block;font-family:var(--font-display);font-weight:600;font-size:21px;line-height:1.15;color:var(--gold);overflow-wrap:anywhere;}
+  .plan-fig.mute .v{color:var(--paper);}
+  .plan-line{margin-top:10px;font-size:11.5px;line-height:1.55;color:var(--paper);}
+  .plan-line b{color:var(--gold);font-weight:700;}
+  .plan-note{margin-top:10px;padding:8px 10px;border-left:3px solid var(--gold);border-radius:0 6px 6px 0;background:rgba(199,154,68,0.14);font-size:11.5px;line-height:1.55;color:var(--paper);}
+  .plan-note b{color:var(--gold);font-weight:700;}
+  .plan-warn{display:none;margin-top:10px;padding:8px 10px;border-left:3px solid var(--pen);border-radius:0 6px 6px 0;background:#f4e0da;color:var(--pen);font-size:11.5px;font-weight:600;line-height:1.55;}
+  .plan-warn.on{display:block;}
+
+  /* ---- Las dos bolsas del fondo ---- */
+  .bolsas{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px;}
+  .bolsa{background:var(--felt-deep);border:1px solid var(--felt-line);border-radius:6px;padding:10px 11px;color:var(--paper);min-width:0;}
+  .bolsa .k{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:#9db5a5;margin-bottom:3px;}
+  .bolsa .v{display:block;font-family:var(--font-display);font-weight:600;font-size:19px;line-height:1.2;overflow-wrap:anywhere;}
+  .bolsa .d{display:block;margin-top:4px;font-size:10.5px;line-height:1.45;color:#cfe0d5;}
+  .bolsa.premios .v{color:#EBC98A;}
+  .bolsa.total{grid-column:1 / -1;background:var(--gold);border-color:var(--gold-deep);color:var(--felt-deep);}
+  .bolsa.total .k,.bolsa.total .d{color:#6B4F1D;}
+  .bolsa.total .v{font-size:24px;color:var(--felt-deep);}
+
+  /* ---- Libro de operaciones en fichas (en móvil no cabe una tabla de 6 columnas) ---- */
+  .movlist{margin-top:4px;}
+  .mov{position:relative;background:var(--paper-2);border:1px solid var(--paper-line);border-left:3px solid var(--paper-line);border-radius:0 6px 6px 0;padding:8px 36px 8px 10px;margin-top:7px;font-size:11.5px;}
+  .mov.in{border-left-color:var(--ok);}
+  .mov.out{border-left-color:var(--pen);}
+  .mov.prize{border-left-color:var(--gold);}
+  .mov-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+  .mov-date{font-size:10.5px;color:var(--muted);}
+  .mov-amt{font-weight:700;font-size:13.5px;white-space:nowrap;}
+  .mov-amt.pos{color:var(--ok);}
+  .mov-amt.neg{color:var(--pen);}
+  .mov-desc{margin-top:2px;line-height:1.45;color:var(--ink);}
+  .mov-desc .t{font-size:9.5px;text-transform:uppercase;letter-spacing:.6px;font-weight:700;color:var(--felt);margin-right:4px;}
+  .mov-bolsas{display:flex;flex-wrap:wrap;gap:2px 3px;margin-top:4px;}
+  .mov-foot{margin-top:4px;font-size:10.5px;color:var(--muted);}
+  .mov-foot b{font-size:11.5px;font-weight:700;color:var(--felt-deep);}
+  .mov .xbtn{position:absolute;top:7px;right:7px;}
+  .pill.bolsa-a{background:#E3ECE5;border-color:var(--felt);color:var(--felt);font-weight:700;}
+  .pill.bolsa-p{background:#F6EAD0;border-color:var(--gold-deep);color:var(--gold-deep);font-weight:700;}
+
+  /* ---- Reparto de premio grande entre jugadores ---- */
+  .reparto{margin-top:8px;padding:8px 10px;background:var(--paper);border:1px dashed var(--gold-deep);border-radius:6px;font-size:11.5px;line-height:1.5;}
+  .reparto .big{display:block;margin:2px 0 3px;font-family:var(--font-display);font-weight:600;font-size:19px;color:var(--felt-deep);}
+  .reparto-d{display:block;font-size:10.5px;color:var(--muted);line-height:1.45;}
 </style>
 
 <header>
@@ -132,12 +186,12 @@
 <div class="panel active" id="panel-reglas">
   <div id="reglas-empty" class="card" style="display:none;">
     <h2>Todavía no hay configuración</h2>
-    <div class="hint">Esta peña juega con boletos gratuitos: no hay precio por apuesta ni gasto en generarlos, solo el tiempo de rellenarlos. La aplicación no asume por su cuenta la cuota de cada jugador ni el número de apuestas por sorteo: complétalos aquí antes de generar ningún boleto. El importe de cada premio se introduce al comprobar el sorteo, no aquí.</div>
+    <div class="hint">La aplicación no asume por su cuenta quién juega ni cuánto se juega: completa aquí los jugadores y el precio de la apuesta antes de generar ningún boleto. Con eso calcula sola cuántas apuestas y cuántos boletos salen del fondo. El importe de cada premio se introduce al comprobar el sorteo, no aquí.</div>
   </div>
 
   <div class="card">
     <h2>Jugadores y aportación mensual</h2>
-    <div class="hint">Cada jugador aporta siempre 4 € al mes. Ese total (jugadores × 4 €) se suma a lo acumulado por reintegros y premios pequeños ya reinvertidos, y se juega todo en cada sorteo — salvo que haya habido un premio grande, cuya parte no reinvertida sale del reparto.</div>
+    <div class="hint">Cada jugador aporta siempre 4 € al mes. Ese total (jugadores × 4 €) se suma a lo acumulado por reintegros y premios pequeños ya reinvertidos, y se juega todo en cada sorteo — salvo que haya habido un premio grande, cuya parte no reinvertida se reparte entre los jugadores y no vuelve al fondo.</div>
     <h3>Jugadores</h3>
     <div id="playerRows"></div>
     <button class="btn btn-ghost" onclick="UI.addPlayerRow()">＋ Añadir jugador</button>
@@ -145,10 +199,32 @@
   </div>
 
   <div class="card">
-    <h2>Boletos</h2>
-    <label>Número de boletos (mínimo 10)</label><input type="number" min="10" id="r_numtickets">
-    <label>Apuestas a generar por sorteo</label><input type="number" min="10" id="r_numapuestas">
-    <div class="hint">Como los boletos son gratuitos, no hay presupuesto que limite cuántas apuestas se juegan: decides aquí el total. Se reparten automáticamente entre los boletos por turnos (round-robin), con un máximo de 8 apuestas por boleto.</div>
+    <h2>Apuestas y boletos <small>calculado</small></h2>
+
+    <label for="r_betprice">Precio de la apuesta (€)</label>
+    <input type="number" min="0.05" step="0.05" id="r_betprice" value="1.00" oninput="UI.renderPlanPreview()">
+    <div class="hint">1,00 € es el precio oficial de una apuesta sencilla de La Primitiva. Cámbialo solo si la administración lo sube: de este precio salen todas las cuentas del sorteo.</div>
+
+    <div class="hint">Ni las apuestas ni los boletos se escriben ya a mano: salen del fondo. Apuestas = presupuesto entero ÷ precio de la apuesta. Boletos = el mayor entre 10 y las apuestas ÷ 8 redondeado hacia arriba, sin pasar nunca del número de apuestas. El reparto entre boletos es por turnos, con un máximo de 8 apuestas por boleto.</div>
+
+    <div class="plan" id="planPreview">
+      <div class="plan-title">Plan del próximo sorteo</div>
+      <div class="plan-src">
+        <span>Aportaciones <b id="plan_aport">—</b></span>
+        <span class="eq">+</span>
+        <span>Premios reinvertidos <b id="plan_premios">—</b></span>
+        <span class="eq">=</span>
+        <span class="tot" id="plan_total">—</span>
+      </div>
+      <div class="plan-grid">
+        <div class="plan-fig"><span class="k">Apuestas</span><span class="v" id="plan_apuestas">—</span></div>
+        <div class="plan-fig"><span class="k">Boletos</span><span class="v" id="plan_boletos">—</span></div>
+        <div class="plan-fig mute"><span class="k">Se juega</span><span class="v" id="plan_jugado">—</span></div>
+        <div class="plan-fig mute"><span class="k">Sobra sin jugar</span><span class="v" id="plan_sobra">—</span></div>
+      </div>
+      <div class="plan-line">Reparto: <b id="plan_reparto">—</b></div>
+      <div class="plan-warn" id="plan_aviso"></div>
+    </div>
   </div>
 
   <div class="card">
@@ -163,7 +239,7 @@
 
   <div class="card">
     <h2>Fondo de la peña</h2>
-    <div class="hint">Los boletos son gratuitos: generarlos y confirmarlos no descuenta nada del fondo. El fondo solo crece con las aportaciones mensuales (4 €/jugador) y con los premios — se guarda para lo que decida la peña, nunca se gasta en jugar.</div>
+    <div class="hint">El fondo se juega entero en cada sorteo: confirmar los boletos descuenta su coste. Lo que entra son las aportaciones mensuales (4 €/jugador) y los premios pequeños, que vuelven al fondo y se reinvierten en apuestas del sorteo siguiente.</div>
     <div class="row">
       <div><label>Umbral premio pequeño (€)</label><input type="number" step="0.5" id="r_smallthr"></div>
     </div>
@@ -190,6 +266,23 @@
 <div class="panel" id="panel-finanzas">
   <div class="card">
     <h2>Fondo de la peña</h2>
+    <div class="bolsas">
+      <div class="bolsa aport">
+        <span class="k">Aportaciones de jugadores</span>
+        <span class="v" id="fu_aport">—</span>
+        <span class="d" id="fu_aport_det"></span>
+      </div>
+      <div class="bolsa premios">
+        <span class="k">Premios reinvertidos</span>
+        <span class="v" id="fu_premios">—</span>
+        <span class="d" id="fu_premios_det"></span>
+      </div>
+      <div class="bolsa total">
+        <span class="k">Total jugable</span>
+        <span class="v" id="fu_total">—</span>
+        <span class="d" id="fu_total_det"></span>
+      </div>
+    </div>
     <div class="totals" id="fundTotals"></div>
     <h3>Registrar movimiento</h3>
     <div class="row">
@@ -206,11 +299,13 @@
       <div><label>Jugador (si aplica)</label><input type="text" id="f_player"></div>
       <div><label>Nota</label><input type="text" id="f_note"></div>
     </div>
+    <div class="hint" id="f_bolsa_hint">La aportación entra en la bolsa de jugadores; la reinversión, en la de premios. Un gasto manual consume primero la bolsa de premios y, si no llega, sigue por la de aportaciones.</div>
     <button class="btn btn-ghost" onclick="UI.addMovimiento()">＋ Añadir movimiento</button>
   </div>
   <div class="card">
     <h2>Libro de operaciones</h2>
-    <div class="tablewrap" id="ledger"></div>
+    <div class="hint">Cada movimiento indica de qué bolsa sale o a cuál entra. Los gastos consumen primero los premios reinvertidos y luego las aportaciones, así que un mismo gasto puede aparecer repartido entre las dos bolsas.</div>
+    <div id="ledger" class="movlist"></div>
   </div>
   <div class="card">
     <h2>Conciliación mensual</h2>
@@ -224,9 +319,27 @@
   <div class="card">
     <h2>Generar boletos del próximo sorteo <small id="gen-method-tag"></small></h2>
     <label>Fecha del sorteo</label><input type="text" id="g_date" placeholder="p. ej. primeros de septiembre 2026">
-    <div class="notice" id="g_presupuesto"></div>
+    <div class="plan" id="g_presupuesto">
+      <div class="plan-title">Presupuesto de este sorteo</div>
+      <div class="plan-src" id="g_src">
+        <span>Aportaciones <b id="g_aport">—</b></span>
+        <span class="eq">+</span>
+        <span>Premios reinvertidos <b id="g_premios">—</b></span>
+        <span class="eq">=</span>
+        <span class="tot" id="g_total">—</span>
+      </div>
+      <div class="plan-grid" id="g_grid">
+        <div class="plan-fig"><span class="k">Apuestas</span><span class="v" id="g_apuestas">—</span></div>
+        <div class="plan-fig"><span class="k">Boletos</span><span class="v" id="g_boletos">—</span></div>
+        <div class="plan-fig"><span class="k">Coste total</span><span class="v" id="g_coste">—</span></div>
+        <div class="plan-fig mute"><span class="k">Sobrante</span><span class="v" id="g_sobrante">—</span></div>
+      </div>
+      <div class="plan-line" id="g_line">Precio de la apuesta <b id="g_precio">—</b> · reparto <b id="g_reparto">—</b></div>
+      <div class="plan-note" id="g_aviso_gasto">Confirmar los boletos <b>sí descuenta del fondo</b> el coste total (<b id="g_coste_aviso">—</b>): se anota como gasto en el libro, consumiendo primero la bolsa de premios y después la de aportaciones. Previsualizar no gasta nada.</div>
+      <div class="plan-warn" id="g_aviso"></div>
+    </div>
     <button class="btn btn-primary" onclick="UI.previsualizarBoletos()">🎲 Previsualizar boletos</button>
-    <div class="hint">La previsualización no gasta nada del fondo ni mueve el cursor del método cíclico. Solo se compromete al confirmar.</div>
+    <div class="hint">La previsualización no gasta nada del fondo ni mueve el cursor del método cíclico: el gasto solo se anota al confirmar.</div>
   </div>
   <div class="card" id="previewCard" style="display:none;">
     <h2>Vista previa <small id="preview-tag"></small></h2>
@@ -313,6 +426,15 @@
    Utilidades básicas
    ============================================================ */
 const $ = id => document.getElementById(id);
+
+/* ============================================================
+   LOGICA PURA: INICIO
+   Todo lo que hay entre este marcador y el de cierre no toca el
+   DOM ni el navegador: es aritmética de la peña. La batería de
+   pruebas (tests/pruebas.js) extrae exactamente este tramo y lo
+   ejecuta en Node, así que no metas aquí nada que use document,
+   localStorage o window.
+   ============================================================ */
 const pad = n => String(n).padStart(2,'0');
 const eur = n => (Number(n)||0).toFixed(2).replace('.',',') + ' €';
 const signedEur = n => (n>=0?'+':'-') + Math.abs(Number(n)||0).toFixed(2).replace('.',',') + ' €';
@@ -554,6 +676,70 @@ function muestrearPoolAleatorio(nPool, semilla){
   const pool = RNG.sample(rng, Array.from({length:49},(_,i)=>i+1), nPool).sort((a,b)=>a-b);
   return {pool, semilla};
 }
+/* ------------------------------------------------------------
+   El plan del sorteo: del dinero a los boletos.
+
+   Nada de esto se configura a mano. La cadena es siempre la misma:
+
+     presupuesto = aportaciones fijas + premios pequeños reinvertidos
+     apuestas    = parte entera de (presupuesto / precio de la apuesta)
+     boletos     = max(10, techo(apuestas / 8)), sin pasar del nº de apuestas
+
+   El suelo de 10 boletos existe porque cada boleto lleva un único
+   reintegro y los reintegros van del 0 al 9: con 10 boletos la peña
+   tiene siempre cubierto el reintegro salga el que salga. El techo de
+   8 apuestas por boleto es el límite del propio boleto de La
+   Primitiva, así que en cuanto el presupuesto pasa de 80 apuestas no
+   caben en 10 boletos y hacen falta más: con 90 € salen 12 boletos,
+   no 10.
+   ------------------------------------------------------------ */
+const MIN_BOLETOS = 10;              /* uno por cada reintegro 0-9 */
+const MAX_APUESTAS_POR_BOLETO = 8;   /* límite del boleto de La Primitiva */
+const PRECIO_APUESTA_DEFECTO = 1;    /* precio oficial de la apuesta simple */
+
+function aCentimos(x){ return Math.round((Number(x)||0)*100); }
+function aEuros(c){ return Math.round(c)/100; }
+
+/* Cuántas apuestas recibe cada boleto al repartir por turnos. Es el
+   mismo reparto que hace repartirApuestasEnBoletos, calculado aquí sin
+   generar ninguna combinación para poder enseñarlo antes de generar. */
+function repartoTeorico(numApuestas, numBoletos){
+  if(numBoletos<=0 || numApuestas<=0) return [];
+  const base = Math.floor(numApuestas/numBoletos), resto = numApuestas%numBoletos;
+  return Array.from({length:numBoletos},(_,i)=> base + (i<resto ? 1 : 0));
+}
+/* "7 boletos de 5 apuestas y 3 de 4" */
+function resumenReparto(reparto){
+  if(!reparto.length) return '';
+  const grupos = new Map();
+  reparto.forEach(n=> grupos.set(n,(grupos.get(n)||0)+1));
+  return Array.from(grupos.entries()).sort((a,b)=>b[0]-a[0])
+    .map(([apuestas,boletos],i)=> i===0
+      ? `${boletos} boleto${boletos===1?'':'s'} de ${apuestas} apuesta${apuestas===1?'':'s'}`
+      : `${boletos} de ${apuestas}`)
+    .join(' y ');
+}
+function planSorteo(saldos, precioApuesta){
+  const centimosFondo = aCentimos(saldos && saldos.aportaciones) + aCentimos(saldos && saldos.premios);
+  const centimosApuesta = aCentimos(precioApuesta);
+  const fondo = aEuros(centimosFondo);
+  if(centimosApuesta<=0){
+    return {fondo, precioApuesta:0, apuestas:0, boletos:0, coste:0, sobrante:fondo,
+            reparto:[], resumen:'', cubreReintegros:false, aviso:'El precio de la apuesta debe ser mayor que cero.'};
+  }
+  const apuestas = Math.max(0, Math.floor(centimosFondo/centimosApuesta));
+  const boletos = apuestas===0 ? 0
+    : Math.min(apuestas, Math.max(MIN_BOLETOS, Math.ceil(apuestas/MAX_APUESTAS_POR_BOLETO)));
+  const coste = aEuros(apuestas*centimosApuesta);
+  const sobrante = aEuros(centimosFondo - apuestas*centimosApuesta);
+  const reparto = repartoTeorico(apuestas, boletos);
+  let aviso = null;
+  if(apuestas===0) aviso = 'El fondo no llega ni para una apuesta: este sorteo no se puede jugar.';
+  else if(boletos<MIN_BOLETOS) aviso = `Con ${apuestas} apuesta${apuestas===1?'':'s'} solo salen ${boletos} boleto${boletos===1?'':'s'}: quedan ${MIN_BOLETOS-boletos} reintegro${MIN_BOLETOS-boletos===1?'':'s'} sin cubrir. Harían falta al menos ${aEuros(MIN_BOLETOS*centimosApuesta).toFixed(2).replace('.',',')} € para cubrir los diez.`;
+  return {fondo, precioApuesta:aEuros(centimosApuesta), apuestas, boletos, coste, sobrante,
+          reparto, resumen:resumenReparto(reparto), cubreReintegros: boletos>=MIN_BOLETOS, aviso};
+}
+
 /* El número de apuestas por boleto no se configura a mano: sale del
    presupuesto del sorteo. Se reparte por turnos (round-robin) entre
    los boletos, así que cada boleto recibe ceil(total/numBoletos) o
@@ -574,9 +760,11 @@ function repartirApuestasEnBoletos(apuestas, numBoletos){
 /* Genera un sorteo completo (previsualización pura, sin efectos
    secundarios sobre el estado compartido: el llamador decide si
    confirma y persiste). */
-function generarBoletos(rules, numApuestasTotal, cyclicState){
-  const numBoletos = rules.numTickets;
-  const meta = {metodo: rules.method};
+function generarBoletos(rules, plan, cyclicState){
+  const numApuestasTotal = plan.apuestas;
+  const numBoletos = plan.boletos;
+  const meta = {metodo: rules.method, plan: plan};
+  if(numApuestasTotal<=0 || numBoletos<=0) throw new Error('El presupuesto no da para ninguna apuesta.');
   let apuestasPlanas, cyclicStateFinal = cyclicState;
 
   if(rules.method==='ANALISIS'){
@@ -604,6 +792,11 @@ function generarBoletos(rules, numApuestasTotal, cyclicState){
   for(let i=0;i<numBoletos;i++) boletos.push({id:i+1, reintegro:reintegros[i], apuestas:boletosApuestas[i]});
   meta.boletos = boletos;
   meta.numApuestasTotal = boletos.reduce((s,b)=>s+b.apuestas.length,0);
+  /* El coste real es el de las apuestas que de verdad se han podido
+     generar, no el del plan: con un pool pequeño el método Análisis
+     puede quedarse corto de combinaciones únicas y sería un error
+     descontar del fondo apuestas que nadie va a jugar. */
+  meta.costeReal = aEuros(meta.numApuestasTotal * aCentimos(plan.precioApuesta));
   meta.cyclicStateFinal = cyclicStateFinal;
   return meta;
 }
@@ -613,35 +806,71 @@ function generarBoletos(rules, numApuestasTotal, cyclicState){
    Puerto literal de finanzas.py.
    ============================================================ */
 const Finanzas = {
-  saldoActual(ledger){ return ledger.movements.length ? ledger.movements[ledger.movements.length-1].balance : ledger.previousFund; },
+  /* Los dos saldos vivos del fondo. El libro guarda en cada movimiento
+     el saldo de las dos bolsas tras aplicarlo, así que el saldo actual
+     es el del último movimiento (o el fondo acumulado del mes anterior
+     si el libro está vacío). */
+  saldos(ledger){
+    const m = ledger.movements;
+    const b = m.length ? m[m.length-1].balance : ledger.previousFund;
+    return {aportaciones: Number(b && b.aportaciones)||0, premios: Number(b && b.premios)||0};
+  },
+  total(saldos){ return aEuros(aCentimos(saldos && saldos.aportaciones) + aCentimos(saldos && saldos.premios)); },
+  saldoActual(ledger){ return Finanzas.total(Finanzas.saldos(ledger)); },
+
+  /* Aplica un movimiento sobre unos saldos y devuelve tanto los saldos
+     resultantes como el desglose por bolsa de ese movimiento.
+
+     La regla de reparto de los gastos es: se consume primero la bolsa
+     de premios reinvertidos y solo después la de aportaciones. Así el
+     dinero ganado vuelve efectivamente al juego -que es para lo que se
+     reinvierte- y en el libro se ve qué parte de cada sorteo se pagó
+     con premios y qué parte con el dinero de los jugadores. Un mismo
+     gasto puede por tanto salir partido entre las dos bolsas. */
+  aplicar(saldos, tipo, importe){
+    const a = aCentimos(saldos && saldos.aportaciones), p = aCentimos(saldos && saldos.premios);
+    const c = aCentimos(importe);
+    let dA = 0, dP = 0;
+    if(tipo==='aportacion') dA = c;
+    else if(tipo==='reinversion') dP = c;
+    else if(tipo==='gasto'){
+      dP = -Math.min(c, Math.max(0,p));
+      dA = -(c + dP);
+    }
+    else if(tipo==='premio'){ /* informativo: el dinero entra por su propio movimiento de reinversión */ }
+    else throw new Error('Tipo de movimiento desconocido: '+tipo);
+    return {
+      saldos: {aportaciones: aEuros(a+dA), premios: aEuros(p+dP)},
+      desglose: {aportaciones: aEuros(dA), premios: aEuros(dP)}
+    };
+  },
   registrarMovimiento(ledger, tipo, importe, opts){
     opts = opts||{};
-    const anterior = Finanzas.saldoActual(ledger);
-    let nuevo;
-    if(tipo==='aportacion') nuevo = anterior + importe;
-    else if(tipo==='gasto') nuevo = anterior - importe;
-    else if(tipo==='reinversion') nuevo = anterior + importe;
-    else if(tipo==='premio') nuevo = anterior;
-    else throw new Error('Tipo de movimiento desconocido: '+tipo);
+    const r = Finanzas.aplicar(Finanzas.saldos(ledger), tipo, importe);
     ledger.movements.push({
-      date: opts.date || new Date().toISOString().slice(0,10), type:tipo,
-      player: opts.player||null, ticketId: opts.ticketId!=null?opts.ticketId:null,
-      amount: Math.round(importe*100)/100, balance: Math.round(nuevo*100)/100, note: opts.note||null
+      date: opts.date || new Date().toISOString().slice(0,10),
+      type: tipo,
+      player: opts.player||null,
+      ticketId: opts.ticketId!=null?opts.ticketId:null,
+      amount: aEuros(aCentimos(importe)),
+      desglose: r.desglose,
+      balance: r.saldos,
+      note: opts.note||null
     });
     return ledger;
   },
-  /* Recalcula el saldo acumulado de cada movimiento desde el fondo previo,
-     en orden. Necesario tras borrar un movimiento intermedio (p.ej. una
-     aportación duplicada por error), para que el saldo de cada fila y el
-     saldo final sigan siendo correctos. */
+  /* Recalcula los saldos de todos los movimientos desde el fondo previo,
+     en orden. Necesario tras borrar un movimiento intermedio (p. ej. una
+     aportación registrada dos veces) y también al migrar un libro antiguo
+     que solo guardaba un saldo único. */
   recalcularBalances(ledger){
-    let saldo = ledger.previousFund;
+    if(typeof ledger.previousFund === 'number') ledger.previousFund = {aportaciones: ledger.previousFund, premios: 0};
+    let saldos = {aportaciones: Number(ledger.previousFund.aportaciones)||0, premios: Number(ledger.previousFund.premios)||0};
     ledger.movements.forEach(m=>{
-      if(m.type==='aportacion' || m.type==='reinversion') saldo += m.amount;
-      else if(m.type==='gasto') saldo -= m.amount;
-      /* 'premio' es solo informativo: el dinero entra por su propio
-         movimiento de 'reinversion' (automática o decidida), no aquí. */
-      m.balance = Math.round(saldo*100)/100;
+      const r = Finanzas.aplicar(saldos, m.type, m.amount);
+      m.desglose = r.desglose;
+      m.balance = r.saldos;
+      saldos = r.saldos;
     });
     return ledger;
   },
@@ -651,6 +880,9 @@ const Finanzas = {
     return Finanzas.recalcularBalances(ledger);
   },
   clasificarUmbralPremio(importe,umbral){ return importe<umbral ? 'pequeno':'grande'; },
+  /* numJugadores solo se usa para informar de cuánto toca a cada uno en
+     un premio grande; no interviene en el saldo del fondo, porque la
+     parte repartida sale de la peña y nunca llega a entrar en el libro. */
   procesarPremio(ledger, importe, umbral, categoria, opts){
     opts = opts||{};
     const tipo = Finanzas.clasificarUmbralPremio(importe,umbral);
@@ -661,17 +893,17 @@ const Finanzas = {
     Finanzas.registrarMovimiento(ledger,'premio',importe,{date:opts.date, ticketId:opts.ticketId, note:`Premio categoría ${categoria}`});
     if(tipo==='pequeno'){
       Finanzas.registrarMovimiento(ledger,'reinversion',importe,{date:opts.date, ticketId:opts.ticketId, note:'Reinversión automática (premio por debajo del umbral)'});
-      return {procesado:true, tipoUmbral:'pequeno', reinvertido:Math.round(importe*100)/100, repartido:0};
+      return {procesado:true, tipoUmbral:'pequeno', reinvertido:aEuros(aCentimos(importe)), repartido:0, porJugador:0};
     }
     const pctR = opts.pctReparto, pctI = opts.pctReinversion;
     if(pctR==null||pctI==null) throw new Error('Debe especificarse pctReparto y pctReinversion.');
     if(Math.round((pctR+pctI)*1e6)/1e6 !== 1) throw new Error('pctReparto + pctReinversion debe sumar 1.0');
-    const reinvertido = importe*pctI, repartido = importe*pctR;
+    const reinvertido = aEuros(aCentimos(importe)*pctI), repartido = aEuros(aCentimos(importe)*pctR);
     if(reinvertido>0) Finanzas.registrarMovimiento(ledger,'reinversion',reinvertido,{date:opts.date, ticketId:opts.ticketId, note:`Reinversión decidida (${(pctI*100).toFixed(0)}%) de premio grande`});
-    return {procesado:true, tipoUmbral:'grande', reinvertido:Math.round(reinvertido*100)/100, repartido:Math.round(repartido*100)/100};
+    const n = Math.max(1, Number(opts.numJugadores)||1);
+    return {procesado:true, tipoUmbral:'grande', reinvertido, repartido, porJugador: aEuros(aCentimos(repartido)/n)};
   }
 };
-
 /* ============================================================
    resultados.js — círculos Unicode, clasificación de premio e
    informe para WhatsApp. Puerto literal de resultados.py.
@@ -758,30 +990,66 @@ function filtrosPorDefecto(){
   };
 }
 function reglasVacias(){ return null; } // sin configuración todavía: no se asume nada
+const VERSION_ESTADO = 2;
 function estadoPorDefecto(){
   return {
-    v:1,
+    v:VERSION_ESTADO,
+    updatedAt:null, rev:0,
     pena:{name:'Peña Baby Boom'},
     rules:null, /* null hasta que el usuario configure explícitamente */
-    finance:{previousFund:0, movements:[]},
+    finance:{previousFund:{aportaciones:0, premios:0}, movements:[]},
     financeArchive:[], /* meses conciliados */
     cyclic:{lastIndexUsed:0, lastRunDate:null},
     currentDraw:null, /* boletos confirmados del sorteo en curso, pendientes de resultado */
     history:[] /* sorteos ya comprobados */
   };
 }
+
+/* ------------------------------------------------------------
+   Migración de un estado guardado con la versión anterior (v1).
+
+   En v1 el fondo era un único número y los boletos se daban por
+   gratuitos, así que las reglas guardaban a mano el número de
+   boletos y de apuestas. En v2 el fondo tiene dos bolsas y esas
+   dos cifras se calculan del presupuesto, de modo que hay que:
+   partir el fondo previo (todo lo antiguo cuenta como aportación,
+   que es lo único que se podía haber acumulado sin gasto),
+   recalcular el libro para que cada movimiento lleve su desglose,
+   y dar de alta el precio de la apuesta.
+   ------------------------------------------------------------ */
+function migrarEstado(estado){
+  if(!estado || !estado.v) return estado;
+  if(estado.v >= VERSION_ESTADO) return estado;
+
+  const f = estado.finance || {previousFund:0, movements:[]};
+  if(typeof f.previousFund === 'number') f.previousFund = {aportaciones:f.previousFund, premios:0};
+  if(!Array.isArray(f.movements)) f.movements = [];
+  Finanzas.recalcularBalances(f);
+  estado.finance = f;
+
+  (estado.financeArchive||[]).forEach(arch=>{
+    if(typeof arch.closingBalance === 'number') arch.closingBalance = {aportaciones:arch.closingBalance, premios:0};
+  });
+
+  if(estado.rules){
+    if(estado.rules.precioApuesta==null) estado.rules.precioApuesta = PRECIO_APUESTA_DEFECTO;
+    delete estado.rules.numTickets;
+    delete estado.rules.apuestasPorSorteo;
+  }
+  estado.v = VERSION_ESTADO;
+  return estado;
+}
 function validarReglas(r){
   const errores=[];
-  /* Los boletos son gratuitos: no hay precio por apuesta ni presupuesto que
-     limite cuántas se generan. La tabla de premios tampoco interviene en
-     la generación (ni en qué números salen, ni en el reparto por
-     boletos): solo se usa después, al comprobar un sorteo, para rellenar
-     el importe automáticamente. Por eso no bloquea el guardado de Reglas
-     si está vacía o incompleta — se puede completar más tarde, cuando la
+  /* Ni el número de boletos ni el de apuestas se validan aquí: ya no se
+     escriben a mano, los calcula planSorteo() a partir del fondo y del
+     precio de la apuesta. La tabla de premios tampoco interviene en la
+     generación (ni en qué números salen, ni en el reparto por boletos):
+     solo se usa después, al comprobar un sorteo, para rellenar el importe
+     automáticamente. Por eso no bloquea el guardado de Reglas si está
+     vacía o incompleta — se puede completar más tarde, cuando la
      administración publique los importes de ese sorteo. */
-  if(r.numTickets<10) errores.push('El número de boletos debe ser 10 como mínimo (cubren los reintegros 0-9).');
-  if(!(r.apuestasPorSorteo>=r.numTickets)) errores.push(`Las apuestas a generar por sorteo deben ser como mínimo ${r.numTickets} (una por boleto).`);
-  if(r.apuestasPorSorteo>r.numTickets*8) errores.push(`Las apuestas a generar por sorteo no pueden superar ${r.numTickets*8} (máximo 8 por boleto).`);
+  if(!(Number(r.precioApuesta)>0)) errores.push('El precio de la apuesta debe ser mayor que cero (1,00 € en La Primitiva).');
   if(!Array.isArray(r.players) || r.players.length<1) errores.push('Debe haber al menos un jugador.');
   else { r.players.forEach((p,i)=>{ if(!p.name || !p.name.trim()) errores.push(`El jugador ${i+1} necesita un nombre.`); }); }
   if(!['ANALISIS','ALEATORIO','CICLICO'].includes(r.method)) errores.push('Método de generación no reconocido.');
@@ -795,6 +1063,10 @@ function validarReglas(r){
   }
   return errores;
 }
+
+/* ============================================================
+   LOGICA PURA: FIN
+   ============================================================ */
 
 /* ============================================================
    Persistencia compartida vía la capacidad `artifact`. Solo los
@@ -865,10 +1137,10 @@ function cargarEstadoInicial(){
   const publicado = leerEstadoPublicado();
   const local = leerEstadoLocal();
   if(!publicado && !local){ origenEstado='nuevo'; return; }
-  if(publicado && !local){ STATE = publicado; origenEstado='publicado'; return; }
-  if(local && !publicado){ STATE = local; origenEstado='local'; return; }
-  if(selloDe(local) > selloDe(publicado)){ STATE = local; origenEstado='local-mas-nuevo'; }
-  else { STATE = publicado; origenEstado='publicado'; }
+  if(publicado && !local){ STATE = migrarEstado(publicado); origenEstado='publicado'; return; }
+  if(local && !publicado){ STATE = migrarEstado(local); origenEstado='local'; return; }
+  if(selloDe(local) > selloDe(publicado)){ STATE = migrarEstado(local); origenEstado='local-mas-nuevo'; }
+  else { STATE = migrarEstado(publicado); origenEstado='publicado'; }
 }
 
 function resetTransientUI(){
@@ -1023,7 +1295,7 @@ const UI = {
         (selloDe(entrante) < selloDe(STATE) ? '⚠ La copia del fichero es MÁS ANTIGUA que lo que tienes ahora.\n\n' : '') +
         '¿Continuar?';
       if(!confirm(aviso)) return;
-      STATE = entrante;
+      STATE = migrarEstado(entrante);
       await publishState();
       alert('Copia restaurada.');
     };
@@ -1050,6 +1322,35 @@ const UI = {
     const n = document.querySelectorAll('#playerRows .playerrow').length;
     const total = n*APORTACION_FIJA_JUGADOR;
     $('playersSum').textContent = `${n} jugador${n===1?'':'es'} × ${eur(APORTACION_FIJA_JUGADOR)} = aportación mensual total ${eur(total)}`;
+    UI.renderPlanPreview();
+  },
+  /* Plan en vivo mientras se editan las reglas. Simula el presupuesto
+     del próximo sorteo con los jugadores que hay ahora mismo escritos
+     en pantalla (aunque no se hayan guardado todavía) y con la bolsa de
+     premios que el fondo ya tiene acumulada. */
+  renderPlanPreview(){
+    if(!$('planPreview')) return;
+    const nJugadores = document.querySelectorAll('#playerRows .playerrow').length;
+    const precio = parseFloat($('r_betprice').value);
+    const bolsaPremios = Finanzas.saldos(STATE.finance).premios;
+    const saldos = {aportaciones: nJugadores*APORTACION_FIJA_JUGADOR, premios: bolsaPremios};
+    const plan = planSorteo(saldos, precio);
+
+    $('plan_aport').textContent   = eur(saldos.aportaciones);
+    $('plan_premios').textContent = eur(saldos.premios);
+    $('plan_total').textContent   = eur(plan.fondo);
+    $('plan_apuestas').textContent = plan.apuestas;
+    $('plan_boletos').textContent  = plan.boletos;
+    $('plan_jugado').textContent   = eur(plan.coste);
+    $('plan_sobra').textContent    = eur(plan.sobrante);
+    $('plan_reparto').textContent  = plan.resumen || '—';
+
+    const aviso = $('plan_aviso');
+    let texto = plan.aviso;
+    if(!nJugadores) texto = 'Todavía no hay ningún jugador: sin aportaciones no hay presupuesto que jugar.';
+    else if(plan.aviso && !plan.cubreReintegros && plan.apuestas>0) texto = '⚠ ' + plan.aviso;
+    aviso.textContent = texto || '';
+    aviso.classList.toggle('on', !!texto);
   },
   renderMethodParams(){
     const method = $('r_method').value;
@@ -1105,8 +1406,7 @@ const UI = {
     $('playerRows').innerHTML='';
     ((r&&r.players)||[]).forEach(p=>UI.addPlayerRow(p.name));
     if(!r || !r.players || !r.players.length){ for(let i=0;i<7;i++) UI.addPlayerRow(''); }
-    $('r_numtickets').value = r ? r.numTickets : 10;
-    $('r_numapuestas').value = r ? r.apuestasPorSorteo : 10;
+    $('r_betprice').value = (r && r.precioApuesta!=null ? r.precioApuesta : PRECIO_APUESTA_DEFECTO).toFixed(2);
     $('r_method').value = r ? r.method : 'ANALISIS';
     UI.renderMethodParams();
     $('r_smallthr').value = r ? r.smallPrizeThreshold : 5.0;
@@ -1144,8 +1444,7 @@ const UI = {
     }
     const rules = {
       prizeTable,
-      numTickets: parseInt($('r_numtickets').value)||10,
-      apuestasPorSorteo: parseInt($('r_numapuestas').value)||parseInt($('r_numtickets').value)||10,
+      precioApuesta: parseFloat($('r_betprice').value),
       players, minMonthly: players.length*APORTACION_FIJA_JUGADOR,
       method, analysis, filters,
       smallPrizeThreshold: parseFloat($('r_smallthr').value)||5,
@@ -1161,17 +1460,55 @@ const UI = {
   /* ================= FINANZAS ================= */
   renderFinanzas(){
     const l = STATE.finance;
-    const saldo = Finanzas.saldoActual(l);
+    const saldos = Finanzas.saldos(l);
+    const total = Finanzas.total(saldos);
+    const nJug = (STATE.rules && STATE.rules.players) ? STATE.rules.players.length : 0;
+    const precio = (STATE.rules && STATE.rules.precioApuesta) || PRECIO_APUESTA_DEFECTO;
+
+    $('fu_aport').textContent = eur(saldos.aportaciones);
+    $('fu_aport_det').textContent = nJug
+      ? `${nJug} jugador${nJug===1?'':'es'} × ${eur(APORTACION_FIJA_JUGADOR)} al mes`
+      : 'Sin jugadores configurados todavía.';
+    const nReinversiones = l.movements.filter(m=>m.type==='reinversion').length;
+    $('fu_premios').textContent = eur(saldos.premios);
+    $('fu_premios_det').textContent = nReinversiones
+      ? `${nReinversiones} reinversión${nReinversiones===1?'':'es'} de premios en este libro`
+      : 'Todavía no ha vuelto ningún premio al fondo.';
+    const plan = planSorteo(saldos, precio);
+    $('fu_total').textContent = eur(total);
+    $('fu_total_det').textContent = plan.apuestas
+      ? `Dan para ${plan.apuestas} apuesta${plan.apuestas===1?'':'s'} en ${plan.boletos} boleto${plan.boletos===1?'':'s'} en el próximo sorteo.`
+      : 'No llega para ninguna apuesta.';
+
     const entradas = l.movements.filter(m=>m.type==='aportacion' || m.type==='reinversion').reduce((s,m)=>s+m.amount,0);
     const salidas = l.movements.filter(m=>m.type==='gasto').reduce((s,m)=>s+m.amount,0);
-    $('fundTotals').innerHTML = `<span>Fondo acum. previo: <b>${eur(l.previousFund)}</b></span><span>Entradas: <b>${eur(entradas)}</b></span><span>Gastos: <b>${eur(salidas)}</b></span><span>Saldo actual: <b>${eur(saldo)}</b></span>`;
-    const tbl = $('ledger');
-    if(!l.movements.length){ tbl.innerHTML='<div class="empty">Sin movimientos todavía.</div>'; return; }
-    const filas = l.movements.map((m,i)=>({m,i})).reverse();
-    tbl.innerHTML = '<table><tr><th>Fecha</th><th>Tipo</th><th class="l">Nota</th><th>€</th><th>Saldo</th><th></th></tr>' +
-      filas.map(({m,i})=>`<tr><td>${m.date}</td><td>${m.type}</td><td class="l">${m.player?m.player+' · ':''}${m.note||''}</td>`+
-        `<td style="color:${(m.type==='gasto')?'var(--pen)':'var(--ok)'};font-weight:700;">${m.type==='gasto'?'-':'+'}${m.amount.toFixed(2)}</td><td>${m.balance.toFixed(2)}</td>`+
-        `<td><button type="button" class="xbtn" title="Eliminar movimiento" onclick="UI.eliminarMovimiento(${i})">✕</button></td></tr>`).join('') + '</table>';
+    const prev = l.previousFund || {aportaciones:0, premios:0};
+    $('fundTotals').innerHTML = `<span>Fondo acum. previo: <b>${eur(Finanzas.total(prev))}</b></span>`+
+      `<span>Entradas del mes: <b>${eur(entradas)}</b></span><span>Gastos del mes: <b>${eur(salidas)}</b></span>`;
+
+    const cont = $('ledger');
+    if(!l.movements.length){ cont.innerHTML='<div class="empty">Sin movimientos todavía.</div>'; return; }
+    cont.innerHTML = l.movements.map((m,i)=>({m,i})).reverse().map(({m,i})=>UI.movimientoHtml(m,i)).join('');
+  },
+  movimientoHtml(m, i){
+    const clase = m.type==='gasto' ? 'out' : (m.type==='premio' ? 'prize' : 'in');
+    const signo = m.type==='gasto' ? '-' : (m.type==='premio' ? '' : '+');
+    const claseImporte = m.type==='gasto' ? 'neg' : (m.type==='premio' ? '' : 'pos');
+    const d = m.desglose || {aportaciones:0, premios:0};
+    const pastillas = [];
+    if(d.premios) pastillas.push(`<span class="pill bolsa-p">Premios ${signedEur(d.premios)}</span>`);
+    if(d.aportaciones) pastillas.push(`<span class="pill bolsa-a">Aportaciones ${signedEur(d.aportaciones)}</span>`);
+    if(m.type==='premio') pastillas.push('<span class="pill">Solo anotación: el dinero entra por su reinversión</span>');
+    const b = m.balance || {aportaciones:0, premios:0};
+    const escapar = t => String(t).replace(/[&<>]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+    const descripcion = [m.player, m.note].filter(Boolean).map(escapar).join(' · ');
+    return `<div class="mov ${clase}">
+      <div class="mov-top"><span class="mov-date">${m.date}</span><span class="mov-amt ${claseImporte}">${signo}${eur(m.amount)}</span></div>
+      <div class="mov-desc"><span class="t">${m.type}</span>${descripcion||'—'}</div>
+      <div class="mov-bolsas">${pastillas.join('')}</div>
+      <div class="mov-foot">Saldo tras el movimiento <b>${eur(Finanzas.total(b))}</b> · ${eur(b.aportaciones)} en aportaciones + ${eur(b.premios)} en premios</div>
+      <button type="button" class="xbtn" title="Eliminar movimiento" onclick="UI.eliminarMovimiento(${i})">✕</button>
+    </div>`;
   },
   async eliminarMovimiento(index){
     const l = STATE.finance;
@@ -1193,39 +1530,73 @@ const UI = {
   },
   async conciliar(){
     if(!confirm('¿Conciliar el mes? El saldo actual pasará a ser el fondo acumulado del próximo mes y el libro se archivará.')) return;
-    const saldo = Finanzas.saldoActual(STATE.finance);
-    STATE.financeArchive.push({closedAt:new Date().toISOString(), movements:STATE.finance.movements, closingBalance:saldo});
-    STATE.finance = {previousFund: saldo, movements: []};
+    const saldos = Finanzas.saldos(STATE.finance);
+    STATE.financeArchive.push({closedAt:new Date().toISOString(), movements:STATE.finance.movements, closingBalance:saldos});
+    /* Las dos bolsas se arrastran al mes siguiente por separado: lo que
+       quedó sin jugar de las aportaciones sigue siendo de los jugadores
+       y lo que quedó de premios sigue siendo dinero ganado. */
+    STATE.finance = {previousFund: saldos, movements: []};
     await publishState();
   },
 
   /* ================= GENERACIÓN ================= */
+  /* Presupuesto del sorteo tal y como está el fondo ahora mismo. Es la
+     única fuente de la que salen las apuestas y los boletos. */
+  planActual(){
+    const r = STATE.rules;
+    if(!r) return null;
+    return planSorteo(Finanzas.saldos(STATE.finance), r.precioApuesta || PRECIO_APUESTA_DEFECTO);
+  },
   renderGeneracion(){
     const r = STATE.rules;
     $('gen-method-tag').textContent = r ? r.method : '';
-    if(!r){ $('g_presupuesto').textContent='Configura primero las Reglas de la peña.'; $('previewCard').style.display='none'; }
-    else {
-      const saldo = Finanzas.saldoActual(STATE.finance);
-      $('g_presupuesto').textContent = `Fondo acumulado: ${eur(saldo)} (los boletos son gratuitos: no se descuenta nada de aquí) · ${r.apuestasPorSorteo} apuestas configuradas para este sorteo en ${r.numTickets} boletos.`;
+    const avisoEl = $('g_aviso');
+    const bloques = ['g_src','g_grid','g_line','g_aviso_gasto'];
+    if(!r){
+      bloques.forEach(id=>{ $(id).style.display='none'; });
+      avisoEl.textContent = 'Configura primero las Reglas de la peña: sin jugadores ni precio de la apuesta no hay presupuesto que repartir.';
+      avisoEl.classList.add('on');
+      $('previewCard').style.display='none';
+      UI.renderCurrentDraw();
+      return;
     }
+    bloques.forEach(id=>{ $(id).style.display=''; });
+    const saldos = Finanzas.saldos(STATE.finance);
+    const plan = UI.planActual();
+    $('g_aport').textContent = eur(saldos.aportaciones);
+    $('g_premios').textContent = eur(saldos.premios);
+    $('g_total').textContent = eur(plan.fondo);
+    $('g_apuestas').textContent = plan.apuestas;
+    $('g_boletos').textContent = plan.boletos;
+    $('g_coste').textContent = eur(plan.coste);
+    $('g_sobrante').textContent = eur(plan.sobrante);
+    $('g_precio').textContent = eur(plan.precioApuesta);
+    $('g_reparto').textContent = plan.resumen || '—';
+    $('g_coste_aviso').textContent = eur(plan.coste);
+    avisoEl.textContent = plan.aviso || '';
+    avisoEl.classList.toggle('on', !!plan.aviso);
     UI.renderCurrentDraw();
   },
   previsualizarBoletos(){
     const r = STATE.rules;
     if(!r){ mostrarError('Configura primero las Reglas de la peña.'); return; }
+    if(STATE.currentDraw){ mostrarError('Ya hay boletos confirmados de un sorteo sin comprobar. Introduce primero su resultado en el panel Sorteo.'); return; }
+    const plan = UI.planActual();
+    if(plan.apuestas<=0){ mostrarError('El fondo no llega ni para una apuesta: registra antes las aportaciones del mes en Finanzas.'); return; }
     document.querySelector('#previewCard .btn-gold').style.display='block';
-    const meta = generarBoletos(r, r.apuestasPorSorteo, STATE.cyclic);
+    const meta = generarBoletos(r, plan, STATE.cyclic);
     pendingDraw = {fecha: $('g_date').value.trim()||null, meta};
     $('previewCard').style.display='block';
     $('preview-tag').textContent = meta.metodo;
-    let infoHtml = `${meta.numApuestasTotal} apuestas en ${r.numTickets} boletos · boletos gratuitos, sin coste para el fondo`;
+    let infoHtml = `${meta.numApuestasTotal} apuestas en ${meta.boletos.length} boletos · coste ${eur(meta.costeReal)} a ${eur(plan.precioApuesta)} la apuesta`;
     if(meta.metodo==='ANALISIS'){
       infoHtml += `<br>Pool de ${meta.pool.length} números (semilla ${meta.semillaPool!=null?meta.semillaPool:'pool manual'}) · cota de Schönheim: ${meta.mMinTeorico} apuestas para cobertura teórica completa · cobertura alcanzada: ${(meta.coveragePct*100).toFixed(1)}% (${meta.subconjuntosCubiertos}/${meta.subconjuntosObjetivo})`;
     }
-    if(meta.numApuestasTotal < r.apuestasPorSorteo){
-      infoHtml += `<br>⚠ Se pedían ${r.apuestasPorSorteo} apuestas, pero el pool elegido solo tiene combinaciones únicas de 6 números para ${meta.numApuestasTotal}. Amplía el tamaño del pool si quieres llegar a las ${r.apuestasPorSorteo} apuestas.`;
+    if(meta.numApuestasTotal < plan.apuestas){
+      infoHtml += `<br>⚠ El presupuesto daba para ${plan.apuestas} apuestas, pero el pool elegido solo tiene combinaciones únicas de 6 números para ${meta.numApuestasTotal}. Se descontarán únicamente ${eur(meta.costeReal)}; amplía el tamaño del pool si quieres jugar el presupuesto entero.`;
     }
-    if(r.numTickets>10) infoHtml += '<br>⚠ Con más de 10 boletos, algún reintegro se repetirá entre boletos.';
+    if(meta.boletos.length>10) infoHtml += `<br>Con ${meta.boletos.length} boletos los diez reintegros siguen cubiertos y ${meta.boletos.length-10} se repiten.`;
+    if(!plan.cubreReintegros) infoHtml += `<br>⚠ ${plan.aviso}`;
     $('previewInfo').innerHTML = infoHtml;
     $('previewTickets').innerHTML = UI.renderTicketsHtml(meta.boletos);
   },
@@ -1236,8 +1607,20 @@ const UI = {
   async confirmarBoletos(){
     if(!pendingDraw){ return; }
     const r = STATE.rules;
-    /* Los boletos son gratuitos: confirmarlos no registra ningún gasto en
-       Finanzas. El fondo solo se mueve con aportaciones y premios. */
+    const meta = pendingDraw.meta;
+    /* Confirmar es el momento en que se gasta el dinero: se anota el
+       coste real de las apuestas generadas, no el del plan, y el libro
+       lo reparte entre las dos bolsas (primero premios, luego
+       aportaciones). Previsualizar no pasa por aquí. */
+    const disponible = Finanzas.saldoActual(STATE.finance);
+    if(meta.costeReal > disponible + 0.001){
+      mostrarError(`El fondo tiene ${eur(disponible)} y estos boletos cuestan ${eur(meta.costeReal)}. Vuelve a previsualizar para recalcular el presupuesto.`);
+      return;
+    }
+    const etiqueta = pendingDraw.fecha ? `Boletos del sorteo ${pendingDraw.fecha}` : 'Boletos del sorteo en curso';
+    Finanzas.registrarMovimiento(STATE.finance, 'gasto', meta.costeReal, {
+      note: `${etiqueta} · ${meta.numApuestasTotal} apuestas × ${eur(meta.plan.precioApuesta)}`
+    });
     if(r.method==='CICLICO') STATE.cyclic = pendingDraw.meta.cyclicStateFinal;
     STATE.currentDraw = {fecha: pendingDraw.fecha, method: pendingDraw.meta.metodo, boletos: pendingDraw.meta.boletos, meta: pendingDraw.meta};
     pendingDraw = null;
@@ -1276,7 +1659,8 @@ const UI = {
         prizes.push({ticketId:b.id, apuestaIdx:idx+1, categoria, importe: importe!=null?importe:null, status:'pendiente'});
       }
     }));
-    STATE.history.push({fecha:d.fecha, numeros:nums, reintegro:reint, ticketsSnapshot:d.boletos, method:d.method, reportText, prizes, ts:Date.now()});
+    STATE.history.push({fecha:d.fecha, numeros:nums, reintegro:reint, ticketsSnapshot:d.boletos, method:d.method,
+      coste: (d.meta && d.meta.costeReal) || 0, reportText, prizes, ts:Date.now()});
     STATE.currentDraw = null;
     $('s_nums').value=''; $('s_reint').value='';
     await publishState();
@@ -1287,6 +1671,7 @@ const UI = {
     if(!last){ c.innerHTML=''; return; }
     const pendientes = last.prizes.filter(p=>p.status==='pendiente');
     if(!pendientes.length){ c.innerHTML = `<div class="card"><h2>Último sorteo comprobado</h2><div class="hint">${last.fecha||''} · sin premios pendientes de registrar.</div></div>`; return; }
+    const nJugadores = Math.max(1, (STATE.rules.players||[]).length);
     c.innerHTML = `<div class="card"><h2>Premios por registrar <small>${last.fecha||''}</small></h2>` +
       pendientes.map((p,i)=>{
         const idx = last.prizes.indexOf(p);
@@ -1303,8 +1688,13 @@ const UI = {
           <label>Importe del premio (€)</label><input type="number" step="0.01" class="prize-amt" id="pz_amt_${idx}" value="${p.importe!=null?p.importe:''}" oninput="UI.onPrizeAmountInput(${idx})">
           <div id="pz_split_wrap_${idx}" style="display:${esGrande?'block':'none'};">
             <div class="hint">Premio igual o superior al umbral (${eur(STATE.rules.smallPrizeThreshold||5)}): decide cómo se reparte antes de registrarlo.</div>
-            <div class="row"><div><label>% reparto entre jugadores</label><input type="number" step="0.05" id="pz_split_${idx}" value="0.5"></div>
-            <div><label>% reinversión al fondo</label><input type="number" step="0.05" id="pz_reinv_${idx}" value="0.5"></div></div>
+            <div class="row"><div><label>% reparto entre jugadores</label><input type="number" step="0.05" id="pz_split_${idx}" value="0.5" oninput="UI.onPrizeAmountInput(${idx})"></div>
+            <div><label>% reinversión al fondo</label><input type="number" step="0.05" id="pz_reinv_${idx}" value="0.5" oninput="UI.onPrizeAmountInput(${idx})"></div></div>
+            <div class="reparto" id="pz_reparto_${idx}">
+              <span>Reparto entre <b id="pz_njug_${idx}">${nJugadores}</b> jugador${nJugadores===1?'':'es'}</span>
+              <span class="big" id="pz_perplayer_${idx}">— por jugador</span>
+              <span class="reparto-d" id="pz_reinv_det_${idx}">A la bolsa de premios vuelven — €, que se jugarán en el próximo sorteo.</span>
+            </div>
           </div>
           <button class="btn btn-gold btn-sm" onclick="UI.registrarPremio(${idx})">✔ Registrar premio</button>
         </div>`;
@@ -1315,6 +1705,21 @@ const UI = {
     const esGrande = importe >= (STATE.rules.smallPrizeThreshold||5);
     const wrap = $('pz_split_wrap_'+idx);
     if(wrap) wrap.style.display = esGrande ? 'block' : 'none';
+    if(!esGrande) return;
+    const nJugadores = Math.max(1, (STATE.rules.players||[]).length);
+    const pctReparto = parseFloat(($('pz_split_'+idx)||{}).value);
+    const pctReinv = parseFloat(($('pz_reinv_'+idx)||{}).value);
+    const porJugador = $('pz_perplayer_'+idx), detalle = $('pz_reinv_det_'+idx);
+    if(porJugador){
+      porJugador.textContent = isNaN(pctReparto)
+        ? '— por jugador'
+        : eur(aEuros(aCentimos(importe)*pctReparto/nJugadores)) + ' por jugador';
+    }
+    if(detalle){
+      detalle.textContent = isNaN(pctReinv)
+        ? 'Indica qué parte vuelve al fondo.'
+        : `A la bolsa de premios vuelven ${eur(aEuros(aCentimos(importe)*pctReinv))}, que se jugarán en el próximo sorteo.`;
+    }
   },
   async registrarPremio(idx){
     const last = STATE.history[STATE.history.length-1];
@@ -1329,9 +1734,11 @@ const UI = {
       if(isNaN(split) || isNaN(reinv) || Math.round((split+reinv)*100)!==100){ mostrarError('% reparto + % reinversión debe sumar 1.0 (100%).'); return; }
       opts.confirmarGrande = true; opts.pctReparto = split; opts.pctReinversion = reinv;
     }
+    opts.numJugadores = Math.max(1, (STATE.rules.players||[]).length);
     const res = Finanzas.procesarPremio(STATE.finance, importe, STATE.rules.smallPrizeThreshold, p.categoria, opts);
     if(!res.procesado){ mostrarError(res.mensaje); return; }
-    p.importe = importe; p.status='registrado'; p.tipoUmbral=res.tipoUmbral; p.reinvertido=res.reinvertido; p.repartido=res.repartido;
+    p.importe = importe; p.status='registrado'; p.tipoUmbral=res.tipoUmbral;
+    p.reinvertido=res.reinvertido; p.repartido=res.repartido; p.porJugador=res.porJugador;
     /* El informe de WhatsApp se generó al comprobar el sorteo con la tabla
        de premios que hubiera en ese momento (rules.prizeTable, que ya no
        se rellena en Reglas y por tanto suele estar vacía): el importe real
@@ -1347,9 +1754,17 @@ const UI = {
 
   /* ================= RESUMEN ================= */
   buildFondoTexto(){
-    const P = STATE.pena, saldo = Finanzas.saldoActual(STATE.finance);
+    const P = STATE.pena;
+    const saldos = Finanzas.saldos(STATE.finance);
+    const saldo = Finanzas.total(saldos);
+    const precio = (STATE.rules && STATE.rules.precioApuesta) || PRECIO_APUESTA_DEFECTO;
+    const plan = planSorteo(saldos, precio);
     const L=[`💼 *${(P.name||'Peña Baby Boom').toUpperCase()}* · Estado del fondo`, new Date().toLocaleDateString('es-ES'), '',
-      `Fondo acumulado previo: ${eur(STATE.finance.previousFund)}`, `*Saldo actual: ${eur(saldo)}*`, ''];
+      `Fondo acumulado previo: ${eur(Finanzas.total(STATE.finance.previousFund||{}))}`,
+      `Aportaciones de jugadores: ${eur(saldos.aportaciones)}`,
+      `Premios reinvertidos: ${eur(saldos.premios)}`,
+      `*Total jugable: ${eur(saldo)}*`,
+      `Da para ${plan.apuestas} apuesta${plan.apuestas===1?'':'s'} en ${plan.boletos} boleto${plan.boletos===1?'':'s'}.`, ''];
     L.push('🧾 *Últimos movimientos*');
     STATE.finance.movements.slice(-8).reverse().forEach(m=>L.push(`${m.date} · ${m.type}${m.note?' · '+m.note:''} · ${m.type==='gasto'?'-':'+'}${eur(m.amount)}`));
     L.push(''); L.push('_Parte generado con BBSuite_');
@@ -1360,8 +1775,9 @@ const UI = {
     if(!d) return 'No hay boletos confirmados de ningún sorteo en curso.';
     const P = STATE.pena;
     const apuestas = d.boletos.reduce((s,b)=>s+b.apuestas.length,0);
+    const coste = (d.meta && d.meta.costeReal) || 0;
     const L=[`🎟️ *${(P.name||'Peña Baby Boom').toUpperCase()}* · Boletos en juego`, `Sorteo: ${d.fecha||'(sin fecha)'} · método ${d.method}`,
-      `${apuestas} apuestas en ${d.boletos.length} boletos · gratis`, ''];
+      `${apuestas} apuestas en ${d.boletos.length} boletos · ${eur(coste)} jugados`, ''];
     d.boletos.forEach(b=>{ L.push(`*Boleto ${b.id}* — reintegro ${b.reintegro}`); b.apuestas.forEach((a,i)=>L.push(`${i+1}) ${a.map(pad).join(' ')}`)); L.push(''); });
     L.push('_Parte generado con BBSuite_');
     return L.join('\n');
@@ -1392,17 +1808,22 @@ const UI = {
   renderInvestigacion(){
     const c = $('metrics');
     if(!STATE.history.length){ c.innerHTML = '<div class="empty">Sin sorteos comprobados todavía.</div>'; return; }
-    let premiado=0, rows='';
+    let premiado=0, gastado=0, rows='';
     STATE.history.slice().reverse().forEach(h=>{
       const apuestas = h.ticketsSnapshot.reduce((s,b)=>s+b.apuestas.length,0);
       const premiadoSorteo = h.prizes.reduce((s,p)=>s+(p.importe||0),0);
-      premiado+=premiadoSorteo;
-      rows += `<tr><td class="l">${h.fecha||'—'}</td><td>${apuestas}</td><td>${h.prizes.length}</td>`+
-        `<td style="font-weight:700;color:var(--ok);">${eur(premiadoSorteo)}</td></tr>`;
+      const costeSorteo = h.coste || 0;
+      premiado+=premiadoSorteo; gastado+=costeSorteo;
+      const saldoSorteo = aEuros(aCentimos(premiadoSorteo)-aCentimos(costeSorteo));
+      rows += `<tr><td class="l">${h.fecha||'—'}</td><td>${apuestas}</td><td>${eur(costeSorteo)}</td><td>${h.prizes.length}</td>`+
+        `<td style="font-weight:700;color:var(--ok);">${eur(premiadoSorteo)}</td>`+
+        `<td style="font-weight:700;color:${saldoSorteo>=0?'var(--ok)':'var(--pen)'};">${signedEur(saldoSorteo)}</td></tr>`;
     });
-    c.innerHTML = `<div class="totals"><span>Sorteos: <b>${STATE.history.length}</b></span><span>Total ganado en premios: <b>${eur(premiado)}</b></span></div>`+
-      `<div class="tablewrap"><table><tr><th class="l">Sorteo</th><th>Apuestas</th><th>Premios</th><th>Ganado</th></tr>${rows}</table></div>`+
-      `<div class="hint">Los boletos son gratuitos: no hay coste que restar, así que lo ganado en premios es beneficio neto sobre el dinero (aparte del tiempo dedicado a rellenarlos). ${AVISO_OBLIGATORIO}</div>`;
+    const balance = aEuros(aCentimos(premiado)-aCentimos(gastado));
+    c.innerHTML = `<div class="totals"><span>Sorteos: <b>${STATE.history.length}</b></span><span>Jugado: <b>${eur(gastado)}</b></span>`+
+      `<span>Ganado en premios: <b>${eur(premiado)}</b></span><span>Balance: <b>${signedEur(balance)}</b></span></div>`+
+      `<div class="tablewrap"><table><tr><th class="l">Sorteo</th><th>Apuestas</th><th>Jugado</th><th>Premios</th><th>Ganado</th><th>Balance</th></tr>${rows}</table></div>`+
+      `<div class="hint">El balance de cada sorteo es lo ganado en premios menos lo jugado. Los premios pequeños vuelven al fondo y se reinvierten, así que aparecen dos veces en la vida de la peña: como ganancia aquí y como presupuesto del sorteo siguiente. ${AVISO_OBLIGATORIO}</div>`;
   },
 
   /* ================= CONOCIMIENTO (local) ================= */
