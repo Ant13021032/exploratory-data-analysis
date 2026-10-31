@@ -1,15 +1,7 @@
 {
-  "canal": "canal1",
-  "title": "Título del vídeo (máximo 100 caracteres)",
-  "description": "Primera línea con la idea principal del vídeo.\n\nEn este vídeo explico...\n\n00:00 Introducción\n01:15 Primer punto\n\n#etiqueta1 #etiqueta2",
-  "tags": [
-    "etiqueta uno",
-    "etiqueta dos",
-    "etiqueta tres"
-  ],
-  "thumbnail": "miniatura.jpg",
-  "categoryId": "27",
-  "language": "es",
-  "madeForKids": false,
-  "containsSyntheticMedia": true
+  "canal": "salud60",
+  "title": "El Pan NO le Engorda a los 60 (Lo Que Dice la Ciencia)",
+  "description": "Resumen en dos o tres frases.\n\n00:00 Introducción\n01:10 El mito\n\nFuentes:\nRevista, año, autor\n\nAviso: contenido educativo, no sustituye a su médico.",
+  "tags": ["pan integral", "salud mayores de 60", "nutrición"],
+  "thumbnail": "miniatura.jpg"
 }

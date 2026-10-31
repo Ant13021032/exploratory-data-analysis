@@ -1,0 +1,16 @@
+{
+  "salud60": {
+    "channelId": "",
+    "categoryId": "27",
+    "language": "es",
+    "madeForKids": false,
+    "containsSyntheticMedia": false
+  },
+  "ordenglobal": {
+    "channelId": "",
+    "categoryId": "25",
+    "language": "es",
+    "madeForKids": false,
+    "containsSyntheticMedia": false
+  }
+}
