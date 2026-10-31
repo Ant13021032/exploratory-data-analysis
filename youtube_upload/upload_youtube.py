@@ -3,7 +3,15 @@
 Sube un vídeo a YouTube en PRIVADO con título, descripción, etiquetas y miniatura.
 
 Uso:
-    python upload_youtube.py --video salida/video.mp4 --meta salida/video.json
+    # Una vez por canal, para vincularlo (elige el canal en la pantalla de Google):
+    python upload_youtube.py --canal canal1 --vincular
+    python upload_youtube.py --canal canal2 --vincular
+
+    # Subidas:
+    python upload_youtube.py --canal canal1 --video salida/video.mp4 --meta salida/video.json
+
+    El canal también puede ir en el JSON ("canal": "canal1"). Si es una lista
+    (["canal1", "canal2"]) el mismo vídeo se sube a los dos.
 
 El JSON de metadatos (ver ejemplo_metadatos.json) lo puede escribir el propio
 generador de vídeos al terminar cada render.
@@ -35,7 +43,14 @@ MAX_RETRIES = 8
 
 
 # ---------------------------------------------------------------- autenticación
-def get_service(client_secret: Path, token_file: Path, headless: bool):
+BASE_DIR = Path(__file__).resolve().parent
+TOKENS_DIR = BASE_DIR / "tokens"
+
+
+def get_service(canal: str, client_secret: Path, headless: bool):
+    """Devuelve el cliente de la API para un canal. Cada canal tiene su propio token."""
+    TOKENS_DIR.mkdir(exist_ok=True)
+    token_file = TOKENS_DIR / f"{canal}.json"
     creds = None
     if token_file.exists():
         creds = Credentials.from_authorized_user_file(str(token_file), SCOPES)
@@ -46,13 +61,39 @@ def get_service(client_secret: Path, token_file: Path, headless: bool):
         else:
             if not client_secret.exists():
                 sys.exit(f"Falta {client_secret}: descárgalo de Google Cloud (credencial OAuth de escritorio).")
-            flow =InstalledAppFlow.from_client_secrets_file(str(client_secret), SCOPES)
-            # La primera vez abre el navegador para dar permiso. Con --headless
-            # imprime la URL y hay que abrirla a mano en un equipo con navegador.
+            print(f"Autorizando el canal «{canal}». En la pantalla de Google elige ESE canal.")
+            flow = InstalledAppFlow.from_client_secrets_file(str(client_secret), SCOPES)
+            # Con --headless imprime la URL y hay que abrirla a mano en un equipo con navegador.
             creds = flow.run_local_server(port=0, open_browser=not headless)
         token_file.write_text(creds.to_json(), encoding="utf-8")
 
-    return build("youtube", "v3", credentials=creds)
+    youtube = build("youtube", "v3", credentials=creds)
+    check_channel(youtube, canal)
+    return youtube
+
+
+def check_channel(youtube, canal: str):
+    """Comprueba que el token apunta al canal que se vinculó la primera vez,
+    para no subir nunca un vídeo al canal equivocado."""
+    items = youtube.channels().list(part="snippet", mine=True).execute().get("items", [])
+    if not items:
+        sys.exit(f"La cuenta autorizada para «{canal}» no tiene canal de YouTube.")
+    actual = {"id": items[0]["id"], "title": items[0]["snippet"]["title"]}
+
+    id_file = TOKENS_DIR / f"{canal}.canal.json"
+    if not id_file.exists():
+        id_file.write_text(json.dumps(actual, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"«{canal}» vinculado a: {actual['title']} ({actual['id']})")
+        return
+
+    esperado = json.loads(id_file.read_text(encoding="utf-8"))
+    if esperado["id"] != actual["id"]:
+        sys.exit(
+            f"ALTO: «{canal}» debería ser {esperado['title']} ({esperado['id']}) "
+            f"pero el token es de {actual['title']} ({actual['id']}). "
+            f"Borra tokens/{canal}.* y vuelve a vincularlo."
+        )
+    print(f"Canal: {actual['title']}")
 
 
 # ---------------------------------------------------------------- validación
@@ -135,20 +176,8 @@ def set_thumbnail(youtube, video_id: str, thumb: Path):
 
 
 # ---------------------------------------------------------------- main
-def main():
-    p = argparse.ArgumentParser(description="Sube un vídeo a YouTube en privado.")
-    p.add_argument("--video", required=True, type=Path)
-    p.add_argument("--meta", required=True, type=Path, help="JSON con título, descripción, etiquetas y miniatura")
-    p.add_argument("--client-secret", default=Path("client_secret.json"), type=Path)
-    p.add_argument("--token", default=Path("token.json"), type=Path)
-    p.add_argument("--headless", action="store_true", help="No abrir navegador en la primera autorización")
-    args = p.parse_args()
-
-    if not args.video.exists():
-        sys.exit(f"No existe el vídeo: {args.video}")
-
-    meta = validate(json.loads(args.meta.read_text(encoding="utf-8")), args.meta.parent)
-    youtube = get_service(args.client_secret, args.token, args.headless)
+def subir_a_canal(canal: str, args, meta: dict):
+    youtube = get_service(canal, args.client_secret, args.headless)
 
     print(f"Subiendo «{meta['title']}» en privado...")
     video_id = upload_video(youtube, args.video, meta)
@@ -163,10 +192,44 @@ def main():
             # funciones intermedias (verificación por teléfono).
             print(f"No se pudo poner la miniatura ({e.resp.status}): {e}")
 
-    # Deja constancia del ID para el resto del flujo automático.
-    (args.meta.with_suffix(".youtube.json")).write_text(
-        json.dumps({"videoId": video_id, "url": f"https://youtu.be/{video_id}"}, indent=2),
-        encoding="utf-8",
+    return {"canal": canal, "videoId": video_id, "url": f"https://youtu.be/{video_id}"}
+
+
+def main():
+    p = argparse.ArgumentParser(description="Sube un vídeo a YouTube en privado.")
+    p.add_argument("--canal", action="append", help="Nombre del canal (se puede repetir). Si falta, se usa 'canal' del JSON")
+    p.add_argument("--vincular", action="store_true", help="Solo autoriza el canal, sin subir nada")
+    p.add_argument("--video", type=Path)
+    p.add_argument("--meta", type=Path, help="JSON con título, descripción, etiquetas y miniatura")
+    p.add_argument("--client-secret", default=BASE_DIR / "client_secret.json", type=Path)
+    p.add_argument("--headless", action="store_true", help="No abrir navegador en la primera autorización")
+    args = p.parse_args()
+
+    if args.vincular:
+        if not args.canal:
+            sys.exit("Indica el canal: --canal NOMBRE --vincular")
+        for canal in args.canal:
+            get_service(canal, args.client_secret, args.headless)
+        return
+
+    if not args.video or not args.meta:
+        sys.exit("Faltan --video y --meta.")
+    if not args.video.exists():
+        sys.exit(f"No existe el vídeo: {args.video}")
+
+    meta = validate(json.loads(args.meta.read_text(encoding="utf-8")), args.meta.parent)
+
+    canales = args.canal or meta.get("canal")
+    if isinstance(canales, str):
+        canales = [canales]
+    if not canales:
+        sys.exit("No sé a qué canal subirlo: usa --canal o pon \"canal\" en el JSON.")
+
+    resultados = [subir_a_canal(c, args, meta) for c in canales]
+
+    # Deja constancia de los IDs para el resto del flujo automático.
+    args.meta.with_suffix(".youtube.json").write_text(
+        json.dumps(resultados, ensure_ascii=False, indent=2), encoding="utf-8"
     )
 
 
