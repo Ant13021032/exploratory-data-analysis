@@ -1,0 +1,10 @@
+{
+  "title": "Título del vídeo (máximo 100 caracteres)",
+  "description": "Primera línea con la idea principal del vídeo.\n\nEn este vídeo explico...\n\n00:00 Introducción\n01:15 Primer punto\n\n#etiqueta1 #etiqueta2",
+  "tags": ["etiqueta uno", "etiqueta dos", "etiqueta tres"],
+  "thumbnail": "miniatura.jpg",
+  "categoryId": "27",
+  "language": "es",
+  "madeForKids": false,
+  "containsSyntheticMedia": true
+}
