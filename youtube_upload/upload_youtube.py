@@ -38,10 +38,13 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
 
+# Permisos mínimos (importante para la auditoría de la API):
+#   youtube.upload         -> subir el vídeo y su miniatura
+#   youtube.readonly       -> comprobar el canal y leer títulos de vídeos
+#   yt-analytics.readonly  -> estadísticas para metricas_canal.py
 SCOPES = [
     "https://www.googleapis.com/auth/youtube.upload",
-    "https://www.googleapis.com/auth/youtube",
-    # Solo lectura de estadísticas, para metricas_canal.py
+    "https://www.googleapis.com/auth/youtube.readonly",
     "https://www.googleapis.com/auth/yt-analytics.readonly",
 ]
 RETRIABLE_STATUS = {500, 502, 503, 504}
