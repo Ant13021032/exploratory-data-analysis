@@ -41,6 +41,8 @@ from googleapiclient.http import MediaFileUpload
 SCOPES = [
     "https://www.googleapis.com/auth/youtube.upload",
     "https://www.googleapis.com/auth/youtube",
+    # Solo lectura de estadísticas, para metricas_canal.py
+    "https://www.googleapis.com/auth/yt-analytics.readonly",
 ]
 RETRIABLE_STATUS = {500, 502, 503, 504}
 MAX_RETRIES = 8
@@ -71,7 +73,9 @@ def cargar_credenciales(canal: str):
             return None, None
         valor = token_file.read_text(encoding="utf-8")
     info = json.loads(valor)
-    return Credentials.from_authorized_user_info(info, SCOPES), info
+    # Se usan los permisos que tenga el propio token: si se pidieran otros al
+    # renovarlo, Google respondería invalid_scope.
+    return Credentials.from_authorized_user_info(info), info
 
 
 def vincular(canal: str, client_secret: Path, headless: bool):
@@ -97,7 +101,8 @@ def vincular(canal: str, client_secret: Path, headless: bool):
     print(f"Para las sesiones en la nube, crea el secreto {env_name(canal)} con el contenido de {token_file}")
 
 
-def get_service(canal: str):
+def credenciales_validas(canal: str):
+    """Credenciales renovadas y listas para usar, o sale con código 3."""
     creds, info = cargar_credenciales(canal)
     if creds is None:
         print(
@@ -116,6 +121,11 @@ def get_service(canal: str):
                 file=sys.stderr,
             )
             sys.exit(SIN_CREDENCIALES)
+    return creds, info
+
+
+def get_service(canal: str):
+    creds, info = credenciales_validas(canal)
     return build("youtube", "v3", credentials=creds), info
 
 
